@@ -1,0 +1,17 @@
+{
+  "extends": "../base-tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "es5",
+      "dom"
+    ],
+    "types": [
+      "cypress",
+      "node",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ]
+}

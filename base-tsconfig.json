@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictBindCallApply": true,
+    "strictNullChecks": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "checkJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "target": "es5"
+  }
+}

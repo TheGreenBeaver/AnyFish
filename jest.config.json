@@ -1,0 +1,7 @@
+{
+  "testEnvironment": "jsdom",
+  "transform": {
+    "^.+\\.tsx?$": ["ts-jest", { "tsconfig": "tsconfig.dev.json" }]
+  },
+  "verbose": true
+}
