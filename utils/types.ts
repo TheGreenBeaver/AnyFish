@@ -2,11 +2,9 @@ export type Nullable<T> = T | null;
 
 export type Optional<T> = T | undefined;
 
-export type Maybe<T> = T | null | undefined;
-
 export type SimpleFunction = (...args: unknown[]) => unknown;
 
-export type Keymap<T = unknown> = Record<string, T>;
+export type StringMap<T = unknown> = Record<string, T>;
 
 export type UnionToIntersection<U> = (
   U extends unknown ? (k: U) => void : never
@@ -14,7 +12,7 @@ export type UnionToIntersection<U> = (
   ? I
   : never;
 
-export type KeymapToUnion<Map> = Map[keyof Map];
+export type StringMapToUnion<Map> = Map[keyof Map];
 
 type ArrayToMap<Arr extends unknown[], Key extends string = 'A'> = Arr extends [infer Only]
   ? { [K in Key]: Only }
@@ -30,6 +28,8 @@ type ExclusiveIntersection<Map> = {
   [PresentKey in keyof Map]: Map[PresentKey] & Partial<Record<keyof MergeExcept<Map, PresentKey>, never>>
 };
 
-export type ExclusiveUnion<Options extends Keymap[]> = KeymapToUnion<ExclusiveIntersection<ArrayToMap<Options>>>;
+export type ExclusiveUnion<Options extends StringMap[]> = StringMapToUnion<ExclusiveIntersection<ArrayToMap<Options>>>;
 
 export type Usable<T, Args extends unknown[] = []> = T | ((...args: Args) => T);
+
+export type MapKey = string | number | symbol;

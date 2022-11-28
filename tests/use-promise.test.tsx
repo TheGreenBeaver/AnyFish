@@ -1,7 +1,6 @@
-import { extractFuncFromHook, extractLastResult, spyOnSingle, waitMs } from './test-utils';
+import { getUniqueReturnedValues, spyOnSingle, waitMs } from './test-utils';
 import usePromise from '../src/use-promise';
-import type { FC } from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 
 describe('usePromise', () => {
   const [usePromiseHook, promiseHookSpy] = spyOnSingle(usePromise);
@@ -12,29 +11,19 @@ describe('usePromise', () => {
     const VALUE = 1;
     const promiseCreator = () => Promise.resolve(VALUE);
 
-    const Component: FC = () => {
-      usePromiseHook(promiseCreator, []);
+    const { result } = renderHook(() => usePromise(promiseCreator, []));
 
-      return <div />;
-    };
-
-    render(<Component />);
-    await waitFor(() => expect(extractLastResult(promiseHookSpy)[0]).toBe(VALUE));
+    await waitFor(() => expect(result.current[0]).toBe(VALUE));
   });
 
   it('Should give access to rejected value', async () => {
     const MESSAGE = 'Error';
     const promiseCreator = () => Promise.reject(new Error(MESSAGE));
 
-    const Component: FC = () => {
-      usePromiseHook(promiseCreator, []);
+    const { result } = renderHook(() => usePromise(promiseCreator, []));
 
-      return <div />;
-    };
-
-    render(<Component />);
     await waitFor(() => {
-      const errorData = extractLastResult(promiseHookSpy)[1];
+      const errorData = result.current[1];
       expect(errorData).toBeInstanceOf(Error);
       expect(errorData).toMatchObject({ message: MESSAGE });
     });
@@ -57,54 +46,45 @@ describe('usePromise', () => {
 
     afterEach(promiseCreatorSpy.mockClear);
 
-    it('Should not update until the first one is resolved with ResolveRace.TakeFirst', async () => {
-      const [trigger] = extractFuncFromHook(
-        () => usePromiseHook(promiseCreatorFn, { resolveRace: usePromise.ResoleRace.TakeFirst })[3],
-      );
+    const performRaceTest = async (
+      resolveRace: usePromise.ResolveRace,
+      tIndex: 0 | 1 | 2,
+      calledTimes: number,
+    ) => {
+      const { result } = renderHook(() => usePromiseHook(
+        promiseCreatorFn, { resolveRace },
+      ));
+      const trigger = (newTimeout: number) => result.current[3].trigger(newTimeout);
 
       TIMEOUTS.forEach(timeout => trigger(timeout));
 
-      await waitFor(() => expect(extractLastResult(promiseHookSpy)[0]).toBe(TIMEOUTS[0]), {
+      await waitFor(() => expect(result.current[0]).toBe(TIMEOUTS[tIndex]), {
         timeout: LAST + 50,
       });
 
       await waitMs(LAST + 50);
-      expect(promiseCreatorSpy).toHaveBeenCalledTimes(1);
-      expect(promiseCreatorSpy).toHaveBeenLastCalledWith(TIMEOUTS[0]);
+      expect(promiseCreatorSpy).toHaveBeenCalledTimes(calledTimes);
+      expect(promiseCreatorSpy).toHaveBeenLastCalledWith(TIMEOUTS[tIndex]);
 
-      expect(promiseHookSpy.mock.results.map(result => ({
-        data: result.value[0],
-        status: result.value[4],
-      }))).toEqual([
+      const uniqueReturnedValues = getUniqueReturnedValues(promiseHookSpy, value => ({
+        data: value[0],
+        status: value[3].status,
+      }));
+      expect(uniqueReturnedValues).toEqual([
         { data: undefined, status: usePromise.Status.Pending },
         { data: undefined, status: usePromise.Status.Processing },
-        { data: TIMEOUTS[0], status: usePromise.Status.Resolved },
+        { data: TIMEOUTS[tIndex], status: usePromise.Status.Resolved },
       ]);
-    });
+    };
 
-    it('Should only update when the last one is resolved with ResolveRace.TakeLast', async () => {
-      const [trigger] = extractFuncFromHook(
-        () => usePromiseHook(promiseCreatorFn, { resolveRace: usePromise.ResoleRace.TakeLast })[3],
-      );
+    it(
+      'Should not update until the first one is resolved with ResolveRace.TakeFirst',
+      () => performRaceTest(usePromise.ResolveRace.TakeFirst, 0, 1),
+    );
 
-      TIMEOUTS.forEach(timeout => trigger(timeout));
-
-      await waitFor(() => expect(extractLastResult(promiseHookSpy)[0]).toBe(TIMEOUTS[2]), {
-        timeout: LAST + 50,
-      });
-
-      await waitMs(LAST + 50);
-      expect(promiseCreatorSpy).toHaveBeenCalledTimes(3);
-      expect(promiseCreatorSpy).toHaveBeenLastCalledWith(TIMEOUTS[2]);
-
-      expect(promiseHookSpy.mock.results.map(result => ({
-        data: result.value[0],
-        status: result.value[4],
-      }))).toEqual([
-        { data: undefined, status: usePromise.Status.Pending },
-        { data: undefined, status: usePromise.Status.Processing },
-        { data: TIMEOUTS[2], status: usePromise.Status.Resolved },
-      ]);
-    });
+    it(
+      'Should only update when the last one is resolved with ResolveRace.TakeLast',
+      () => performRaceTest(usePromise.ResolveRace.TakeLast, 2, 3),
+    );
   });
 });

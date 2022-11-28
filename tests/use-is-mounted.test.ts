@@ -6,9 +6,13 @@ describe('useIsMounted', () => {
     const [useIsMountedHook, isMountedHookSpy] = spyOnSingle(useIsMounted);
     const [switchTab] = createSwitchingComponents({ useHook: useIsMountedHook });
 
-    expect(extractLastResult(isMountedHookSpy)()).toBeTruthy();
+    const firstGetIsMounted = extractLastResult(isMountedHookSpy);
+    expect(firstGetIsMounted()).toBeTruthy();
 
     switchTab();
-    expect(extractLastResult(isMountedHookSpy)()).toBeFalsy();
+    const secondGetIsMounted = extractLastResult(isMountedHookSpy);
+    expect(secondGetIsMounted()).toBeFalsy();
+
+    expect(secondGetIsMounted).toBe(firstGetIsMounted);
   });
 });

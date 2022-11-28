@@ -1,17 +1,32 @@
-import type { Usable } from './types';
+import type { StringMap, MapKey, Usable } from './types';
+import isFunction from 'lodash/isFunction';
+import isPlainObject from 'lodash/isPlainObject';
+import isObject from 'lodash/isObject';
+import mapValues from 'lodash/mapValues';
+import { Settings } from './settings';
 
-export const isFunction = (v: unknown): v is CallableFunction => typeof v === 'function';
+export function isObjectWithKey<Key extends MapKey>(
+  v: unknown, key: Key, plain: false,
+): v is Record<Key, unknown> & object;
+export function isObjectWithKey<Key extends MapKey>(
+  v: unknown, key: Key, plain?: true
+): v is Record<Key, unknown> & StringMap;
+export function isObjectWithKey<Key extends MapKey>(
+  v: unknown, key: Key, plain?: boolean,
+) {
+  const typeCheck = plain ? isPlainObject : isObject;
 
-export const isString = (v: unknown): v is string => typeof v === 'string';
-
-export const isObject = (v: unknown): v is object => typeof v === 'object' && !!v;
+  return typeCheck(v) && key in v;
+}
 
 export const use = <T, Args extends unknown[] = []>(factory: Usable<T, Args>, ...args: Args): T =>
   isFunction(factory) ? factory(...args) : factory;
 
-export const pick = <Obj extends object, Keys extends string[]>(obj: Obj, keys: Keys) => Object
-  .getOwnPropertyNames(Object.getPrototypeOf(obj))
-  .reduce(
-    (result, key) => keys.includes(key) ? { ...result, [key]: obj[key as keyof Obj] } : result,
-    {},
-  ) as Pick<Obj, Keys[number] & keyof Obj>;
+export const devConsole = mapValues(console, method => isFunction(method)
+  ? (...args: Parameters<typeof method>) => {
+    if (use(Settings.isDev)) {
+      method(...args);
+    }
+  }
+  : method,
+) as Console;

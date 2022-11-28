@@ -1,8 +1,9 @@
-import type { ExclusiveUnion, Keymap, SimpleFunction } from '../utils/types';
+import type { ExclusiveUnion, StringMap, SimpleFunction } from '../utils/types';
 import type { FC } from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { fireEvent, render } from '@testing-library/react';
 import { memo, useState } from 'react';
+import { isObjectWithKey } from '../utils/misc';
 
 export const spyOnSingle = <Method extends SimpleFunction>(
   method: Method,
@@ -24,11 +25,15 @@ export function extractLastResult<Result>(spy: jest.SpyInstance<Result>): Result
 
 export const extractFuncFromHook = <
   Func extends SimpleFunction,
-  Props extends Keymap,
+  Props extends StringMap,
 >(
   useHook: (props: Props) => Func,
   initialProps: Props = {} as Props,
-): [(...args: Parameters<Func>) => void, jest.SpyInstance<ReturnType<FC<Props>>, Parameters<FC<Props>>>] => {
+): [
+  (...args: Parameters<Func>) => void,
+  jest.SpyInstance<ReturnType<FC<Props>>, Parameters<FC<Props>>>,
+  (newProps: Props) => void,
+] => {
   const BUTTON_TEXT = 'trigger';
   let currentArgs: Parameters<Func>;
 
@@ -45,26 +50,28 @@ export const extractFuncFromHook = <
   const [ComponentBody, ComponentBodySpy] = spyOnSingle(RawComponent);
   const MemoComponent = memo(ComponentBody);
 
-  const { getByText } = render(<MemoComponent {...initialProps} />);
+  const { getByText, rerender } = render(<MemoComponent {...initialProps} />);
 
   const trigger = (...args: Parameters<Func>) => {
     currentArgs = args;
     fireEvent.click(getByText(BUTTON_TEXT));
   };
 
-  return [trigger, ComponentBodySpy];
+  const rerenderWithProps = (newProps: Props) => rerender(<MemoComponent {...newProps} />);
+
+  return [trigger, ComponentBodySpy, rerenderWithProps];
 };
 
-type SwitchingComponentsOptions<Props extends Keymap> =
+type SwitchingComponentsOptions<Props extends StringMap> =
   ExclusiveUnion<[{ useHook: (props: Props) => unknown }, { ActivityComponent: FC<Props> }]>;
 
-export const createSwitchingComponents = <Props extends Keymap>(
+export const createSwitchingComponents = <Props extends StringMap>(
   options: SwitchingComponentsOptions<Props>,
   initialProps: Props = {} as Props,
 ): [() => void, RenderResult] => {
   const BUTTON_TEXT = 'switch';
 
-  const ActivityComponent: FC<Props> = 'ActivityComponent' in options
+  const ActivityComponent: FC<Props> = isObjectWithKey(options, 'ActivityComponent')
     ? options.ActivityComponent
     : props => {
       options.useHook(props);
@@ -89,3 +96,10 @@ export const createSwitchingComponents = <Props extends Keymap>(
 
   return [() => fireEvent.click(renderResult.getByText(BUTTON_TEXT)), renderResult];
 };
+
+export function getUniqueReturnedValues <Result, Adjusted = Result>(
+  spy: jest.SpyInstance<Result>,
+  adjust: (value: Result) => Adjusted = value => value as Adjusted & Result,
+): Adjusted[] {
+  return Array.from(new Set(spy.mock.results.map(result => result.value))).map(value => adjust(value));
+}

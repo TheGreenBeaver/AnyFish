@@ -1,13 +1,26 @@
 import { useEffect } from 'react';
+import { devConsole } from '../utils/misc';
+
+const cleanupWarning =
+  'The effect passed to useDidMount returned with a non-empty value. ' +
+  'If your effect needs cleanup, consider using plain useEffect: ' +
+  'https://reactjs.org/docs/hooks-reference.html#useeffect';
 
 /**
- * Execute the callback after the first render
+ * Executes the effect after the initial render.
+ *
+ * The return value of the effect is ignored. Use plain {@link React.useEffect} for effects that need cleanup.
+ *
+ * @version 0.0.1
+ * @see https://github.com/TheGreenBeaver/AnyFish#usedidmount
  */
-const useDidMount = (callback: () => void): void => {
-  useEffect(() => {
-    // Long notation so that no `return`s affect the hook logic
-    callback();
-  }, []);
-};
+const useDidMount = (effect: () => unknown): void => useEffect(() => {
+  const cleanup = effect();
+
+  if (cleanup !== undefined) {
+    devConsole.warn(cleanupWarning);
+  }
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
 export default useDidMount;

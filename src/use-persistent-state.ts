@@ -1,43 +1,85 @@
 import type { Dispatch, SetStateAction} from 'react';
-import { useCallback, useState } from 'react';
-import { use } from '../utils/misc';
+import { useEffect, useMemo, useState } from 'react';
+import { devConsole, use } from '../utils/misc';
 import type { Usable } from '../utils/types';
+import defaults from 'lodash/defaults';
 
 type Options<S> = {
   storage: Storage,
   serializer: { stringify: (value: S) => string, parse: (serialized: string) => S },
+  cleanup: boolean,
+  clearOnParsingError: boolean,
 };
 
-const getDefaultOptions = <S>(): Options<S> => ({
-  storage: localStorage,
-  serializer: JSON,
-});
+const defaultSerializer = {
+  stringify: (value: unknown) => JSON.stringify({ value }),
+  parse: (serialized: string) => JSON.parse(serialized).value,
+};
 
+const getOptions = <S>(providedOptions?: Partial<Options<S>>): Options<S> => defaults(
+  {}, providedOptions, {
+    storage: localStorage,
+    serializer: defaultSerializer,
+    cleanup: true,
+    clearOnParsingError: true,
+  },
+);
+
+/**
+ * A convenience wrapper for {@link React.useState} that lets you keep data in a persistent browser storage.
+ *
+ * @version 0.0.1
+ * @see https://github.com/TheGreenBeaver/AnyFish#usepersistentstate
+ */
 const usePersistentState = <S>(
-  initializer: Usable<S>,
+  initialValue: Usable<S>,
   key: string,
   options?: Partial<Options<S>>,
 ): [S, Dispatch<SetStateAction<S>>] => {
-  const { storage, serializer } = { ...getDefaultOptions<S>(), ...options };
+  const { storage, serializer, cleanup, clearOnParsingError } = useMemo(() => getOptions<S>(options), [options]);
 
   const [value, setValue] = useState<S>(() => {
     const storedData = storage.getItem(key);
 
     if (storedData != null) {
-      return serializer.parse(storedData);
+      try {
+        return serializer.parse(storedData);
+      } catch (e) {
+        if (clearOnParsingError) {
+          storage.removeItem(key);
+        }
+
+        devConsole.error('Failed to parse the stored data for usePersistentState', e);
+      }
     }
 
-    return use(initializer);
+    return use(initialValue);
   });
 
-  const setPersistentValue: Dispatch<SetStateAction<S>> = useCallback(update => setValue(curr => {
-    const newValue = use(update, curr);
-    storage.setItem(key, serializer.stringify(newValue));
+  useEffect(() => {
+    const lastStorage = storage;
+    const lastKey = key;
+    const lastSerializer = serializer;
 
-    return newValue;
-  }), [key, serializer, storage]);
+    try {
+      storage.setItem(key, serializer.stringify(value));
+    } catch (e) {
+      devConsole.error('Failed to stringify the current value of usePersistentState', e);
+    }
 
-  return [value, setPersistentValue];
+    return () => {
+      if (cleanup && (
+        lastStorage !== storage ||
+        lastKey !== key ||
+        lastSerializer !== serializer
+      )) {
+        storage.removeItem(key);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, storage, value, serializer]);
+
+  return [value, setValue];
 };
 
 export default usePersistentState;

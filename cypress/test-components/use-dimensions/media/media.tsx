@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import pic from './pic.jpg';
 import useDimensions from '../../../../src/use-dimensions';
+import { UseDimensions } from '../../../constants';
 
 const Media: FC = () => {
   const dimensions = useDimensions(pic);
@@ -8,11 +9,11 @@ const Media: FC = () => {
   return dimensions
     ? (
       <div>
-        <p id='width'>{dimensions.width}</p>
-        <p id='height'>{dimensions.height}</p>
+        <p id={UseDimensions.WidthId}>{dimensions.width}</p>
+        <p id={UseDimensions.HeightId}>{dimensions.height}</p>
       </div>
     ) : (
-      <p id='loading'>Loading image...</p>
+      <p>Loading image...</p>
     );
 };
 

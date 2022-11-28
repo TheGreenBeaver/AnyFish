@@ -1,6 +1,6 @@
 {
   "extends": "./base-tsconfig.json",
-  "include": ["./src", "./utils", "./index.ts"],
+  "include": ["./src", "./utils", "./index.ts", "./typedef"],
   "compilerOptions": {
     "declaration": true
   }

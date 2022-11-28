@@ -1,66 +1,87 @@
-import type { Optional } from '../utils/types';
+import type { Optional, Usable } from '../utils/types';
 import useMountedState from './use-mounted-state';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { use } from '../utils/misc';
+import isArray from 'lodash/isArray';
+import defaults from 'lodash/defaults';
+import isNil from 'lodash/isNil';
 
-enum Status {
-  Pending = 'pending',
-  Processing = 'processing',
-  Resolved = 'resolved',
-  Rejected = 'rejected',
-}
-
-enum ResoleRace {
-  TakeFirst = 'takeFirst',
-  TakeLast = 'takeLast',
-  TakeEvery = 'takeEvery',
-}
-
-const EnumHolder = { Status, ResoleRace } as const;
-
-type Options<Data> = {
-  resolveRace: ResoleRace,
+export type Options<Data, Deps extends unknown[]> = Partial<{
+  resolveRace: usePromise.ResolveRace,
   onStart: () => void,
   onSuccess: (result: Data) => void,
   onError: (e: unknown) => void,
   onAny: () => void,
+  skip: Usable<boolean, Deps>,
+}>;
+
+type More<Deps extends unknown[]> = {
+  status: usePromise.Status,
+  trigger: (...args: Deps) => Promise<void>,
 };
 
-type HookResult<Data, Deps extends unknown[]> = [
+export type HookResult<Data, Deps extends unknown[]> = [
   Optional<Data>,
   unknown,
   boolean,
-  (...args: Deps) => Promise<void>,
-  Status,
+  More<Deps>,
 ];
 
-function usePromiseImplementation <Data, Deps extends unknown[]>(
-  promiseCreator: (...args: Deps) => Promise<Data>, options?: Partial<Options<Data>>,
+const defaultSkip = <Deps extends unknown[]>(...deps: Deps): boolean => deps.some(isNil);
+
+const getOptions = <Data, Deps extends unknown[]>(
+  providedOptions?: Options<Data, Deps>,
+): Options<Data, Deps> => defaults(
+  {}, providedOptions, {
+    resolveRace: usePromise.ResolveRace.TakeEvery,
+    skip: defaultSkip,
+  },
+);
+
+/**
+ * Tracks the lifecycle of a Promise, handles data storing and error catching.
+ *
+ * @version 0.0.1
+ * @see https://github.com/TheGreenBeaver/AnyFish#usepromise
+ */
+function usePromise <Data, Deps extends unknown[]>(
+  promiseCreator: (...args: Deps) => Promise<Data>, options?: Options<Data, Deps>,
 ): HookResult<Data, Deps>;
-function usePromiseImplementation <Data, Deps extends unknown[]>(
-  promiseCreator: (...args: Deps) => Promise<Data>, deps?: Deps,
+/**
+ * Tracks the lifecycle of a Promise, handles data storing and error catching and automatically triggers on `deps`
+ * change.
+ *
+ * @version 0.0.1
+ * @see https://github.com/TheGreenBeaver/AnyFish#usepromise
+ */
+function usePromise <Data, Deps extends unknown[]>(
+  promiseCreator: (...args: Deps) => Promise<Data>, deps?: Deps, options?: Options<Data, Deps>,
 ): HookResult<Data, Deps>;
-function usePromiseImplementation <Data, Deps extends unknown[]>(
-  promiseCreator: (...args: Deps) => Promise<Data>, deps?: Deps, options?: Partial<Options<Data>>,
-): HookResult<Data, Deps>;
-function usePromiseImplementation <Data, Deps extends unknown[]>(
+function usePromise <Data, Deps extends unknown[]>(
   promiseCreator: (...args: Deps) => Promise<Data>,
-  secondArg?: Deps | Partial<Options<Data>>,
-  thirdArg?: Partial<Options<Data>>,
+  secondArg?: Deps | Options<Data, Deps>,
+  thirdArg?: Options<Data, Deps>,
 ): HookResult<Data, Deps> {
-  const secondIsArray = Array.isArray(secondArg);
+  const secondIsArray = isArray(secondArg);
   const deps = secondIsArray ? secondArg : undefined;
   const options = thirdArg || (!secondIsArray ? secondArg : undefined);
 
-  const resolveRace = options?.resolveRace || ResoleRace.TakeLast;
-  const { onStart, onSuccess, onError, onAny } = options || {};
+  const {
+    onStart,
+    onSuccess,
+    onError,
+    onAny,
+    skip,
+    resolveRace,
+  } = useMemo(() => getOptions(options), [options]);
 
   const [data, setData] = useMountedState<Optional<Data>>(undefined);
   const [error, setError] = useMountedState(undefined);
-  const [status, setStatus] = useMountedState<Status>(Status.Pending);
+  const [status, setStatus] = useMountedState<usePromise.Status>(usePromise.Status.Pending);
   const lastPromiseRef = useRef<Optional<Promise<Data>>>(undefined);
 
   const trigger = useCallback(async (...args: Deps) => {
-    if (resolveRace === ResoleRace.TakeFirst && lastPromiseRef.current) {
+    if (resolveRace === usePromise.ResolveRace.TakeFirst && lastPromiseRef.current) {
       return;
     }
 
@@ -68,13 +89,13 @@ function usePromiseImplementation <Data, Deps extends unknown[]>(
     lastPromiseRef.current = promise;
 
     const doIfWonRace = (action: () => void) => {
-      if (resolveRace !== ResoleRace.TakeLast || lastPromiseRef.current === promise) {
+      if (resolveRace !== usePromise.ResolveRace.TakeLast || lastPromiseRef.current === promise) {
         action();
       }
     };
 
     onStart?.();
-    setStatus(Status.Processing);
+    setStatus(usePromise.Status.Processing);
 
     try {
       const result = await promise;
@@ -82,13 +103,13 @@ function usePromiseImplementation <Data, Deps extends unknown[]>(
       doIfWonRace(() => {
         setData(result);
         onSuccess?.(result);
-        setStatus(Status.Resolved);
+        setStatus(usePromise.Status.Resolved);
       });
     } catch (e) {
       doIfWonRace(() => {
         setError(e);
         onError?.(e);
-        setStatus(Status.Rejected);
+        setStatus(usePromise.Status.Rejected);
       });
     } finally {
       doIfWonRace(() => {
@@ -99,15 +120,31 @@ function usePromiseImplementation <Data, Deps extends unknown[]>(
   }, [promiseCreator, resolveRace, onStart, onSuccess, onError, onAny, setData, setError, setStatus]);
 
   useEffect(() => {
-    if (deps) {
+    if (deps && !use(skip, ...deps)) {
       trigger(...deps);
     }
-  }, deps ? [...deps, trigger] : []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps ? [...deps, trigger, skip] : []);
 
-  return useMemo(() => [data, error, status === Status.Processing, trigger, status], [data, error, trigger, status]);
+  return useMemo(
+    () => [data, error, status === usePromise.Status.Processing, { trigger, status }],
+    [data, error, trigger, status],
+  );
 }
 
-const usePromise: typeof usePromiseImplementation & typeof EnumHolder =
-  Object.assign(usePromiseImplementation, EnumHolder);
+namespace usePromise {
+  export enum Status {
+    Pending = 'pending',
+    Processing = 'processing',
+    Resolved = 'resolved',
+    Rejected = 'rejected',
+  }
+
+  export enum ResolveRace {
+    TakeFirst = 'takeFirst',
+    TakeLast = 'takeLast',
+    TakeEvery = 'takeEvery',
+  }
+}
 
 export default usePromise;

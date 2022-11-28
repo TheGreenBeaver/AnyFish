@@ -8,7 +8,7 @@ describe('useRenderCount', () => {
   it('Should return the number of times the Component has rendered', () => {
     const [useCountHook, countHookSpy] = spyOnSingle(useRenderCount);
 
-    const RawComponent: FC<{ text: string}> = ({ text }) => {
+    const RawComponent: FC<{ text: string }> = ({ text }) => {
       useCountHook();
 
       return <p>Text: {text}</p>;
@@ -16,15 +16,15 @@ describe('useRenderCount', () => {
 
     const [ComponentBody, ComponentBodySpy] = spyOnSingle(RawComponent);
     const MemoComponent = memo(ComponentBody);
+    const check = () => expect(extractLastResult(countHookSpy)()).toBe(ComponentBodySpy.mock.calls.length);
 
     const { rerender } = render(<MemoComponent text='lorem' />);
+    check();
 
-    expect(extractLastResult(countHookSpy)()).toBe(ComponentBodySpy.mock.calls.length);
+    rerender(<MemoComponent text="ipsum" />);
+    check();
 
-    rerender(<MemoComponent text='ipsum' />);
-    expect(extractLastResult(countHookSpy)()).toBe(ComponentBodySpy.mock.calls.length);
-
-    rerender(<MemoComponent text='ipsum' />);
-    expect(extractLastResult(countHookSpy)()).toBe(ComponentBodySpy.mock.calls.length);
+    rerender(<MemoComponent text="ipsum" />);
+    check();
   });
 });

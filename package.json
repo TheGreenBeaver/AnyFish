@@ -35,17 +35,20 @@
     "build:esm": "yarn build:base --outDir lib/esm",
     "build:cjs": "yarn build:base --outDir lib/cjs --module commonjs",
     "build": "yarn build:esm && yarn build:cjs",
-    "test:functional": "jest",
-    "test:visual": "cypress run --component",
+    "test:node-env": "jest",
+    "test:browser-env": "cypress run --component",
     "lint:main": "eslint src tests utils",
     "lint:cypress": "eslint cypress --parser-options=project:./cypress/tsconfig.json"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@types/jest": "^29.1.2",
+    "@types/lodash": "^4.14.190",
     "@types/node": "^18.11.9",
     "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
+    "@types/testing-library__jest-dom": "^5.14.5",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",
     "cypress": "^10.11.0",
@@ -66,5 +69,8 @@
   "peerDependencies": {
     "react": ">=17.0.0"
   },
-  "packageManager": "yarn@3.2.4"
+  "packageManager": "yarn@3.2.4",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
 }

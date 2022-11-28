@@ -1,65 +1,105 @@
 import type { RefObject } from 'react';
 import { useCallback, useEffect, useMemo } from 'react';
-import { isFunction, isObject, isString } from '../utils/misc';
+import { isObjectWithKey } from '../utils/misc';
+import isFunction from 'lodash/isFunction';
+import isPlainObject from 'lodash/isPlainObject';
+import isString from 'lodash/isString';
+import isBool from 'lodash/isBoolean';
 
-type Target = EventTarget | RefObject<EventTarget>;
+export type Target = EventTarget | RefObject<EventTarget>;
 type Options = AddEventListenerOptions | boolean;
 type ManyListeners = EventListenerOrEventListenerObject[];
-type WindowListener<KnownName extends keyof WindowEventMap> = (this: Window, ev: WindowEventMap[KnownName]) => void;
 
-const isOptions = (v: unknown): v is Options =>
-  isObject(v)
-  && ['capture', 'once', 'passive', 'signal'].some(field => field in v);
+const boolKeys = ['capture', 'once', 'passive'];
+const optionsKeys = [...boolKeys, 'signal'];
+const isOptions = (v: unknown): v is Options => {
+  if (isBool(v)) {
+    return true;
+  }
+
+  if (!isPlainObject(v) || Object.keys(v).some(key => !optionsKeys.includes(key))) {
+    return false;
+  }
+
+  for (const boolKey of boolKeys) {
+    if (v[boolKey] !== undefined && !isBool(v[boolKey])) {
+      return false;
+    }
+  }
+
+  return v.signal === undefined || v.signal instanceof AbortSignal;
+};
+
 const isListener = (v: unknown): v is EventListenerOrEventListenerObject =>
-  isFunction(v) ||
-  (isObject(v) && 'handleEvent' in v);
+  isFunction(v) || isObjectWithKey(v, 'handleEvent') && isFunction(v.handleEvent);
 
+/**
+ * Adds the provided listeners to the target and performs automatic cleanup.
+ *
+ * @version 0.0.1
+ * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
+ */
 function useEventListener (
   targetPointer: Target,
   eventName: string,
   options: Options,
   ...eventListeners: ManyListeners
 ): void;
+/**
+ * Adds the provided listener to the target and performs automatic cleanup.
+ *
+ * @version 0.0.1
+ * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
+ */
 function useEventListener (
   targetPointer: Target,
   eventName: string,
   eventListener: EventListenerOrEventListenerObject,
   options: Options,
 ): void;
+/**
+ * Adds the provided listeners to the target and performs automatic cleanup.
+ *
+ * @version 0.0.1
+ * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
+ */
 function useEventListener (
   targetPointer: Target,
   eventName: string,
   ...eventListeners: ManyListeners
 ): void;
 
+/**
+ * Adds the provided listeners to window and performs automatic cleanup.
+ *
+ * @version 0.0.1
+ * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
+ */
 function useEventListener (
   eventName: string,
   options: Options,
   ...eventListeners: ManyListeners
 ): void;
+/**
+ * Adds the provided listener to window and performs automatic cleanup.
+ *
+ * @version 0.0.1
+ * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
+ */
 function useEventListener (
   eventName: string,
   eventListener: EventListenerOrEventListenerObject,
   options: Options,
 ): void;
+/**
+ * Adds the provided listeners to window and performs automatic cleanup.
+ *
+ * @version 0.0.1
+ * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
+ */
 function useEventListener (
   eventName: string,
   ...eventListeners: ManyListeners
-): void;
-
-function useEventListener<KnownName extends keyof WindowEventMap> (
-  eventName: KnownName,
-  options: Options,
-  ...eventListeners: WindowListener<KnownName>[]
-): void;
-function useEventListener<KnownName extends keyof WindowEventMap> (
-  eventName: KnownName,
-  eventListener: WindowListener<KnownName>,
-  options: Options,
-): void;
-function useEventListener<KnownName extends keyof WindowEventMap> (
-  eventName: KnownName,
-  ...eventListeners: WindowListener<KnownName>[]
 ): void;
 
 function useEventListener (
@@ -79,12 +119,10 @@ function useEventListener (
   }, [secondArg, thirdArg, fourthArg, rest]);
 
   useEffect(() => {
-    const currentTarget = 'current' in targetAccessor ? targetAccessor.current : targetAccessor;
+    const currentTarget = isObjectWithKey(targetAccessor, 'current', false) ? targetAccessor.current : targetAccessor;
     currentTarget?.addEventListener(eventName, combinedEventListener, options);
 
-    return () => {
-      currentTarget?.removeEventListener(eventName, combinedEventListener, options);
-    };
+    return () => currentTarget?.removeEventListener(eventName, combinedEventListener, options);
   }, [targetAccessor, eventName, combinedEventListener, options]);
 }
 

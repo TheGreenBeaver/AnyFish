@@ -1,4 +1,7 @@
 {
   "extends": "./base-tsconfig.json",
-  "include": ["./src", "./utils", "./tests", "./index.ts"],
+  "include": ["./src", "./utils", "./tests", "./index.ts", "./typedef"],
+  "compilerOptions": {
+    "types": ["node", "jest", "@testing-library/jest-dom"]
+  }
 }

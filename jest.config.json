@@ -3,5 +3,8 @@
   "transform": {
     "^.+\\.tsx?$": ["ts-jest", { "tsconfig": "tsconfig.dev.json" }]
   },
-  "verbose": true
+  "verbose": true,
+  "setupFilesAfterEnv": [
+    "<rootDir>/setupTests.js"
+  ]
 }
