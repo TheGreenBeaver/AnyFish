@@ -11,7 +11,7 @@ describe('useEventListener', () => {
   const TEXT = 'Click me';
   const listener = jest.fn();
 
-  afterEach(listener.mockClear);
+  beforeEach(listener.mockClear);
 
   it('Should work with plain EventTarget', async () => {
     const INDICATOR = 'Visible';

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 /**
  * Executes the effect before the component unmounts.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usewillunmount
  */
 const useWillUnmount = (effect: () => void): void => {

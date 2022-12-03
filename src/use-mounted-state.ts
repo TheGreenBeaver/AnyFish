@@ -7,7 +7,7 @@ import useIsMounted from './use-is-mounted';
  *
  * The call signature is identical to {@link React.useState}.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usemountedstate
  */
 const useMountedState = <T>(

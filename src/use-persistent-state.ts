@@ -1,8 +1,7 @@
 import type { Dispatch, SetStateAction} from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { devConsole, use } from '../utils/misc';
+import { createGetOptions, devConsole, use } from '../utils/misc';
 import type { Usable } from '../utils/types';
-import defaults from 'lodash/defaults';
 
 type Options<S> = {
   storage: Storage,
@@ -16,19 +15,17 @@ const defaultSerializer = {
   parse: (serialized: string) => JSON.parse(serialized).value,
 };
 
-const getOptions = <S>(providedOptions?: Partial<Options<S>>): Options<S> => defaults(
-  {}, providedOptions, {
-    storage: localStorage,
-    serializer: defaultSerializer,
-    cleanup: true,
-    clearOnParsingError: true,
-  },
-);
+const getOptions = createGetOptions({
+  storage: localStorage,
+  serializer: defaultSerializer,
+  cleanup: true,
+  clearOnParsingError: true,
+}) as <S>(providedOptions?: Partial<Options<S>>) => Options<S>;
 
 /**
  * A convenience wrapper for {@link React.useState} that lets you keep data in a persistent browser storage.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usepersistentstate
  */
 const usePersistentState = <S>(
@@ -49,7 +46,7 @@ const usePersistentState = <S>(
           storage.removeItem(key);
         }
 
-        devConsole.error('Failed to parse the stored data for usePersistentState', e);
+        devConsole.error(`Failed to parse the data stored for usePersistentState at "${key}"`, e);
       }
     }
 
@@ -64,7 +61,7 @@ const usePersistentState = <S>(
     try {
       storage.setItem(key, serializer.stringify(value));
     } catch (e) {
-      devConsole.error('Failed to stringify the current value of usePersistentState', e);
+      devConsole.error(`Failed to stringify the current value of usePersistentState to store at ${key}`, e);
     }
 
     return () => {

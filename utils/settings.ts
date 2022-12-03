@@ -1,7 +1,7 @@
 import type { Usable } from './types';
 
 export type SettingsType = {
-  isDev: Usable<boolean>,
+  isDev: Usable<boolean, [keyof Console]>,
 };
 
 export const Settings: SettingsType = {

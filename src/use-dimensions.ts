@@ -42,19 +42,19 @@ const configs: { [Kind in useDimensions.MediaKind]: MeasuringLogic<ElementByKind
   },
 };
 
-const keys = ['width', 'height'];
+const keys = ['width', 'height'] as const;
 
 /**
  * Calculates the dimensions of a visual media object by its source.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedimensions
  */
 function useDimensions(src: string, mediaKind?: useDimensions.MediaKind): Nullable<Dimensions>;
 /**
  * Returns a callback ref to pass to a DOM element and calculates the dimensions of that element.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedimensions
  */
 function useDimensions<T extends Element>(options?: Options<T>): [Nullable<Dimensions>, RefCallback<T>];
@@ -102,8 +102,8 @@ function useDimensions<T extends Element>(
           });
 
           setDimensions(newDimensions);
-        } catch {
-          devConsole.error(`Failed to load media at ${src}`);
+        } catch (e) {
+          devConsole.error(`Failed to load media at ${src}`, e);
         }
         measurable.remove();
       }
@@ -123,6 +123,8 @@ function useDimensions<T extends Element>(
 
     if (instance) {
       resizeObserver.observe(instance);
+    } else {
+      setDimensions(null);
     }
   }, [originalRef, resizeObserver]);
 

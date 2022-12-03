@@ -1,12 +1,31 @@
-import PersistentState from '../test-components/use-persistent-state';
+import SimpleText from '../test-components/use-persistent-state/simple-text';
+import Nullish from '../test-components/use-persistent-state/nullish';
+import { UsePersistentState } from '../constants';
 
 describe('usePersistentState', () => {
   it('Should keep the state in browser storage', () => {
-    cy.mount(<PersistentState />).then(cmp => {
-      cy.get('input').type('text');
+    const TEXT = 'text';
+    cy.mount(<SimpleText />).then(cmp => {
+      cy.get('input').type(TEXT);
       cmp.unmount({ log: true });
     });
-    cy.mount(<PersistentState />);
-    cy.get('input').should('have.value', 'text');
+    cy.mount(<SimpleText />);
+    cy.get('input').should('have.value', TEXT);
+  });
+
+  it('Should properly handle empty values with default serializer', () => {
+    cy.mount(<Nullish />).then(cmp => {
+      cy.get(UsePersistentState.elements.ButtonSelector).click();
+      cmp.unmount({ log: true });
+    });
+
+    cy.mount(<Nullish />).then(cmp => {
+      cy.get(UsePersistentState.elements.IndicatorSelector).should('have.text', UsePersistentState.indicatorText);
+      cmp.unmount({ log: true });
+    });
+
+    cy.clearLocalStorage();
+    cy.mount(<Nullish />);
+    cy.get(UsePersistentState.elements.IndicatorSelector).should('not.have.text', UsePersistentState.indicatorText);
   });
 });

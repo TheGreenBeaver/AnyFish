@@ -47,3 +47,11 @@ export const UseDimensions = createSelectorProvider({
   HeightId: 'height',
   MeasuredId: 'measured',
 });
+
+export const UsePersistentState = {
+  elements: createSelectorProvider({
+    ButtonId: 'clear-button',
+    IndicatorId: 'indicator',
+  }),
+  indicatorText: 'CORRECT',
+};

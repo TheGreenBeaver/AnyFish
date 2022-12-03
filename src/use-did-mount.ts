@@ -11,7 +11,7 @@ const cleanupWarning =
  *
  * The return value of the effect is ignored. Use plain {@link React.useEffect} for effects that need cleanup.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedidmount
  */
 const useDidMount = (effect: () => unknown): void => useEffect(() => {

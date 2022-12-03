@@ -36,7 +36,7 @@ const isListener = (v: unknown): v is EventListenerOrEventListenerObject =>
 /**
  * Adds the provided listeners to the target and performs automatic cleanup.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 function useEventListener (
@@ -48,7 +48,7 @@ function useEventListener (
 /**
  * Adds the provided listener to the target and performs automatic cleanup.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 function useEventListener (
@@ -60,7 +60,7 @@ function useEventListener (
 /**
  * Adds the provided listeners to the target and performs automatic cleanup.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 function useEventListener (
@@ -72,7 +72,7 @@ function useEventListener (
 /**
  * Adds the provided listeners to window and performs automatic cleanup.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 function useEventListener (
@@ -83,7 +83,7 @@ function useEventListener (
 /**
  * Adds the provided listener to window and performs automatic cleanup.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 function useEventListener (
@@ -94,7 +94,7 @@ function useEventListener (
 /**
  * Adds the provided listeners to window and performs automatic cleanup.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 function useEventListener (

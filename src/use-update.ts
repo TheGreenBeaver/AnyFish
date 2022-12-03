@@ -1,7 +1,7 @@
 import type { EffectCallback } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import isFunction from 'lodash/isFunction';
-import defaults from 'lodash/defaults';
+import { createGetOptions } from '../utils/misc';
 
 export type Options = {
   nthUpdate: number,
@@ -9,14 +9,12 @@ export type Options = {
   once: boolean,
 };
 
-const getOptions = (providedOptions?: Partial<Options>): Options => defaults(
-  {}, providedOptions, { nthUpdate: 1, withCleanup: true, once: false },
-);
+const getOptions = createGetOptions<Options>({ nthUpdate: 1, withCleanup: true, once: false });
 
 /**
  * A convenience wrapper for {@link React.useEffect} when the first N `deps` updates should not trigger the effect.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useupdate
  */
 const useUpdate = (

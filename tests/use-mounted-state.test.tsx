@@ -63,7 +63,7 @@ describe('useMountedState', () => {
     expect(extractLastResult(mountedStateHookSpy)[0]).toBe(State.Second);
 
     switchTab();
-    await waitMs(TIMEOUT + 50);
+    await waitMs(TIMEOUT);
     expect(extractLastResult(mountedStateHookSpy)[0]).toBe(State.Second);
 
     expect(onSetState).toHaveBeenCalledTimes(1);

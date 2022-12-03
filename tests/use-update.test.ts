@@ -6,7 +6,7 @@ describe('useUpdate', () => {
   const cleanup = jest.fn();
   const effect = jest.fn((...args: unknown[]) => () => cleanup(...args));
 
-  afterEach(() => {
+  beforeEach(() => {
     cleanup.mockClear();
     effect.mockClear();
   });
@@ -26,7 +26,7 @@ describe('useUpdate', () => {
     ];
   };
 
-  it('Should only execute the effect once and skip the cleanup', () => {
+  it('Should only execute the effect once and allow skipping the cleanup', () => {
     const [rerender] = prepare({ once: true, withCleanup: false });
     expect(effect).not.toHaveBeenCalled();
 
@@ -38,7 +38,7 @@ describe('useUpdate', () => {
     expect(cleanup).not.toHaveBeenCalled();
   });
 
-  it('Should allow enforcing running cleanup functions', () => {
+  it('Should only run the cleanup once', () => {
     const [rerender] = prepare({ once: true });
     expect(cleanup).not.toHaveBeenCalled();
 
@@ -53,8 +53,17 @@ describe('useUpdate', () => {
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
+  it('Should trigger on each update since Nth if `once` is not set', () => {
+    const [rerender] = prepare();
+    expect(effect).not.toHaveBeenCalled();
+
+    const TIMES = 3;
+    rerender(TIMES);
+    expect(effect).toHaveBeenCalledTimes(TIMES);
+  });
+
   it('Should allow specifying which update is the triggering one', () => {
-    const [rerender] = prepare({ nthUpdate: 2, once: true, withCleanup: false });
+    const [rerender] = prepare({ nthUpdate: 2 });
     expect(effect).not.toHaveBeenCalled();
 
     rerender();
@@ -74,7 +83,7 @@ describe('useUpdate', () => {
     rerender();
     expect(cleanup).not.toHaveBeenCalled();
 
-    reset({ nthUpdate: 2, withCleanup: true });
+    reset({ nthUpdate: 2 });
 
     rerender(2);
     expect(effect).toHaveBeenCalledTimes(1);

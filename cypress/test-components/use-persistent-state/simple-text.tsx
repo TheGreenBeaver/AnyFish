@@ -1,7 +1,7 @@
 import type { FC } from 'react';
-import usePersistentState from '../../src/use-persistent-state';
+import usePersistentState from '../../../src/use-persistent-state';
 
-const PersistentState: FC = () => {
+const SimpleText: FC = () => {
   const [inputValue, setInputValue] = usePersistentState('', 'inputValue');
 
   return (
@@ -9,4 +9,4 @@ const PersistentState: FC = () => {
   );
 };
 
-export default PersistentState;
+export default SimpleText;

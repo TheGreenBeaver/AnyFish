@@ -1,6 +1,6 @@
 {
   "name": "any-fish",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Utility React Hooks for any purpose",
   "keywords": [
     "react",
@@ -37,8 +37,10 @@
     "build": "yarn build:esm && yarn build:cjs",
     "test:node-env": "jest",
     "test:browser-env": "cypress run --component",
+    "test": "yarn test:node-env && yarn test:browser-env",
     "lint:main": "eslint src tests utils",
-    "lint:cypress": "eslint cypress --parser-options=project:./cypress/tsconfig.json"
+    "lint:cypress": "eslint cypress --parser-options=project:./cypress/tsconfig.json",
+    "lint": "yarn lint:main && yarn lint:cypress"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",

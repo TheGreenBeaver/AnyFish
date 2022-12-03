@@ -1,9 +1,8 @@
 import type { Optional, Usable } from '../utils/types';
 import useMountedState from './use-mounted-state';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { use } from '../utils/misc';
+import { createGetOptions, use } from '../utils/misc';
 import isArray from 'lodash/isArray';
-import defaults from 'lodash/defaults';
 import isNil from 'lodash/isNil';
 
 export type Options<Data, Deps extends unknown[]> = Partial<{
@@ -29,19 +28,15 @@ export type HookResult<Data, Deps extends unknown[]> = [
 
 const defaultSkip = <Deps extends unknown[]>(...deps: Deps): boolean => deps.some(isNil);
 
-const getOptions = <Data, Deps extends unknown[]>(
-  providedOptions?: Options<Data, Deps>,
-): Options<Data, Deps> => defaults(
-  {}, providedOptions, {
-    resolveRace: usePromise.ResolveRace.TakeEvery,
-    skip: defaultSkip,
-  },
-);
+const getOptions = createGetOptions({
+  resolveRace: 'takeLast',
+  skip: defaultSkip,
+}) as <Data, Deps extends unknown[]>(providedOptions?: Options<Data, Deps>) => Options<Data, Deps>;
 
 /**
  * Tracks the lifecycle of a Promise, handles data storing and error catching.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usepromise
  */
 function usePromise <Data, Deps extends unknown[]>(
@@ -51,7 +46,7 @@ function usePromise <Data, Deps extends unknown[]>(
  * Tracks the lifecycle of a Promise, handles data storing and error catching and automatically triggers on `deps`
  * change.
  *
- * @version 0.0.1
+ * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usepromise
  */
 function usePromise <Data, Deps extends unknown[]>(
@@ -143,7 +138,6 @@ namespace usePromise {
   export enum ResolveRace {
     TakeFirst = 'takeFirst',
     TakeLast = 'takeLast',
-    TakeEvery = 'takeEvery',
   }
 }
 

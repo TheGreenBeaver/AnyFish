@@ -16,6 +16,11 @@
     "sourceType": "module",
     "project": "./tsconfig.dev.json"
   },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "plugins": [
     "react",
     "@typescript-eslint",
@@ -39,6 +44,12 @@
     "@typescript-eslint/consistent-type-exports": "error",
     "@typescript-eslint/consistent-type-imports": "error",
     "@typescript-eslint/no-duplicate-enum-values": "error",
+    "@typescript-eslint/no-inferrable-types": [
+      "error",
+      {
+        "ignoreParameters": true
+      }
+    ],
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-redundant-type-constituents": "error",
     "@typescript-eslint/switch-exhaustiveness-check": "error",
