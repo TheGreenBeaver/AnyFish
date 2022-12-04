@@ -1,4 +1,4 @@
-import useDidMount from '../src/use-did-mount';
+import { useDidMount } from '../src/use-did-mount';
 import { renderHook } from '@testing-library/react';
 
 describe('useDidMount', () => {

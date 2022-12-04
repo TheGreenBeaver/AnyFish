@@ -1,4 +1,4 @@
-import useMountedState from '../src/use-mounted-state';
+import { useMountedState } from '../src/use-mounted-state';
 import type { Dispatch, FC, SetStateAction } from 'react';
 import { useEffect } from 'react';
 import { createSwitchingComponents, extractLastResult, spyOnSingle, waitMs } from './test-utils';

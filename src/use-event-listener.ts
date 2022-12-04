@@ -39,7 +39,7 @@ const isListener = (v: unknown): v is EventListenerOrEventListenerObject =>
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
-function useEventListener (
+export function useEventListener (
   targetPointer: Target,
   eventName: string,
   options: Options,
@@ -51,7 +51,7 @@ function useEventListener (
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
-function useEventListener (
+export function useEventListener (
   targetPointer: Target,
   eventName: string,
   eventListener: EventListenerOrEventListenerObject,
@@ -63,7 +63,7 @@ function useEventListener (
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
-function useEventListener (
+export function useEventListener (
   targetPointer: Target,
   eventName: string,
   ...eventListeners: ManyListeners
@@ -75,7 +75,7 @@ function useEventListener (
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
-function useEventListener (
+export function useEventListener (
   eventName: string,
   options: Options,
   ...eventListeners: ManyListeners
@@ -86,7 +86,7 @@ function useEventListener (
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
-function useEventListener (
+export function useEventListener (
   eventName: string,
   eventListener: EventListenerOrEventListenerObject,
   options: Options,
@@ -97,12 +97,12 @@ function useEventListener (
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
-function useEventListener (
+export function useEventListener (
   eventName: string,
   ...eventListeners: ManyListeners
 ): void;
 
-function useEventListener (
+export function useEventListener (
   firstArg: Target | string,
   secondArg: string | Options | EventListenerOrEventListenerObject,
   thirdArg?: Options | EventListenerOrEventListenerObject,
@@ -125,5 +125,3 @@ function useEventListener (
     return () => currentTarget?.removeEventListener(eventName, combinedEventListener, options);
   }, [targetAccessor, eventName, combinedEventListener, options]);
 }
-
-export default useEventListener;

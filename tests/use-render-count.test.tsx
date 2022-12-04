@@ -1,4 +1,4 @@
-import useRenderCount from '../src/use-render-count';
+import { useRenderCount } from '../src/use-render-count';
 import { extractLastResult, spyOnSingle } from './test-utils';
 import type { FC} from 'react';
 import { memo } from 'react';

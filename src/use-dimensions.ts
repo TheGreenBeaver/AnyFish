@@ -50,15 +50,15 @@ const keys = ['width', 'height'] as const;
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedimensions
  */
-function useDimensions(src: string, mediaKind?: useDimensions.MediaKind): Nullable<Dimensions>;
+export function useDimensions(src: string, mediaKind?: useDimensions.MediaKind): Nullable<Dimensions>;
 /**
  * Returns a callback ref to pass to a DOM element and calculates the dimensions of that element.
  *
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedimensions
  */
-function useDimensions<T extends Element>(options?: Options<T>): [Nullable<Dimensions>, RefCallback<T>];
-function useDimensions<T extends Element>(
+export function useDimensions<T extends Element>(options?: Options<T>): [Nullable<Dimensions>, RefCallback<T>];
+export function useDimensions<T extends Element>(
   firstArg?: string | Options<T>,
   secondArg?: useDimensions.MediaKind,
 ) {
@@ -103,7 +103,7 @@ function useDimensions<T extends Element>(
 
           setDimensions(newDimensions);
         } catch (e) {
-          devConsole.error(`Failed to load media at ${src}`, e);
+          devConsole.error(`Failed to load media at ${src}`);
         }
         measurable.remove();
       }
@@ -131,11 +131,9 @@ function useDimensions<T extends Element>(
   return isMedia ? dimensions : [dimensions, dimensionsTracker];
 }
 
-namespace useDimensions {
+export namespace useDimensions {
   export enum MediaKind {
     Image = 'image',
     Video = 'video',
   }
 }
-
-export default useDimensions;

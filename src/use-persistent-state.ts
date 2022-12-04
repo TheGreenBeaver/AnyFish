@@ -28,7 +28,7 @@ const getOptions = createGetOptions({
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usepersistentstate
  */
-const usePersistentState = <S>(
+export const usePersistentState = <S>(
   initialValue: Usable<S>,
   key: string,
   options?: Partial<Options<S>>,
@@ -46,7 +46,7 @@ const usePersistentState = <S>(
           storage.removeItem(key);
         }
 
-        devConsole.error(`Failed to parse the data stored for usePersistentState at "${key}"`, e);
+        devConsole.error(`Failed to parse the data stored for usePersistentState at "${key}"\n`, e);
       }
     }
 
@@ -61,7 +61,7 @@ const usePersistentState = <S>(
     try {
       storage.setItem(key, serializer.stringify(value));
     } catch (e) {
-      devConsole.error(`Failed to stringify the current value of usePersistentState to store at ${key}`, e);
+      devConsole.error(`Failed to stringify the current value of usePersistentState to store at ${key}\n`, e);
     }
 
     return () => {
@@ -78,5 +78,3 @@ const usePersistentState = <S>(
 
   return [value, setValue];
 };
-
-export default usePersistentState;

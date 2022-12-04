@@ -14,7 +14,7 @@ const cleanupWarning =
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedidmount
  */
-const useDidMount = (effect: () => unknown): void => useEffect(() => {
+export const useDidMount = (effect: () => unknown): void => useEffect(() => {
   const cleanup = effect();
 
   if (cleanup !== undefined) {
@@ -22,5 +22,3 @@ const useDidMount = (effect: () => unknown): void => useEffect(() => {
   }
 // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
-
-export default useDidMount;

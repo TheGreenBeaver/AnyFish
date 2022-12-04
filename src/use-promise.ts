@@ -1,5 +1,5 @@
 import type { Optional, Usable } from '../utils/types';
-import useMountedState from './use-mounted-state';
+import { useMountedState } from './use-mounted-state';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createGetOptions, use } from '../utils/misc';
 import isArray from 'lodash/isArray';
@@ -39,7 +39,7 @@ const getOptions = createGetOptions({
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usepromise
  */
-function usePromise <Data, Deps extends unknown[]>(
+export function usePromise <Data, Deps extends unknown[]>(
   promiseCreator: (...args: Deps) => Promise<Data>, options?: Options<Data, Deps>,
 ): HookResult<Data, Deps>;
 /**
@@ -49,10 +49,10 @@ function usePromise <Data, Deps extends unknown[]>(
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usepromise
  */
-function usePromise <Data, Deps extends unknown[]>(
+export function usePromise <Data, Deps extends unknown[]>(
   promiseCreator: (...args: Deps) => Promise<Data>, deps?: Deps, options?: Options<Data, Deps>,
 ): HookResult<Data, Deps>;
-function usePromise <Data, Deps extends unknown[]>(
+export function usePromise <Data, Deps extends unknown[]>(
   promiseCreator: (...args: Deps) => Promise<Data>,
   secondArg?: Deps | Options<Data, Deps>,
   thirdArg?: Options<Data, Deps>,
@@ -91,6 +91,8 @@ function usePromise <Data, Deps extends unknown[]>(
 
     onStart?.();
     setStatus(usePromise.Status.Processing);
+    setData(undefined);
+    setError(undefined);
 
     try {
       const result = await promise;
@@ -127,7 +129,7 @@ function usePromise <Data, Deps extends unknown[]>(
   );
 }
 
-namespace usePromise {
+export namespace usePromise {
   export enum Status {
     Pending = 'pending',
     Processing = 'processing',
@@ -140,5 +142,3 @@ namespace usePromise {
     TakeLast = 'takeLast',
   }
 }
-
-export default usePromise;

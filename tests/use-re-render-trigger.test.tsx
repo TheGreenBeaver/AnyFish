@@ -1,4 +1,4 @@
-import useReRenderTrigger from '../src/use-re-render-trigger';
+import { useReRenderTrigger } from '../src/use-re-render-trigger';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { spyOnSingle } from './test-utils';
 import type { FC } from 'react';

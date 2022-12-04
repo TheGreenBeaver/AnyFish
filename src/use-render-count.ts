@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef } from 'react';
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#userendercount
  */
-const useRenderCount = (): () => number => {
+export const useRenderCount = (): () => number => {
   const renderCountRef = useRef<number>(0);
 
   useEffect(() => {
@@ -15,5 +15,3 @@ const useRenderCount = (): () => number => {
 
   return useCallback(() => renderCountRef.current, []);
 };
-
-export default useRenderCount;

@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import useEventListener from '../src/use-event-listener';
+import { useEventListener } from '../src/use-event-listener';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { fireEvent, render, renderHook, waitFor } from '@testing-library/react';
 import type { Nullable } from '../utils/types';

@@ -1,4 +1,4 @@
-import useIsMounted from '../src/use-is-mounted';
+import { useIsMounted } from '../src/use-is-mounted';
 import { createSwitchingComponents, extractLastResult, spyOnSingle } from './test-utils';
 
 describe('useIsMounted', () => {

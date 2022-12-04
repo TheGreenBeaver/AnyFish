@@ -17,7 +17,7 @@ const getOptions = createGetOptions<Options>({ nthUpdate: 1, withCleanup: true, 
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useupdate
  */
-const useUpdate = (
+export const useUpdate = (
   effect: EffectCallback,
   deps: unknown[],
   options?: Partial<Options>,
@@ -47,5 +47,3 @@ const useUpdate = (
     currentOptionsRef.current = getOptions(overrideOptions);
   }, []);
 };
-
-export default useUpdate;

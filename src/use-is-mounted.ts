@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef } from 'react';
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useismounted
  */
-const useIsMounted = (): () => boolean => {
+export const useIsMounted = (): () => boolean => {
   const isMountedRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -19,5 +19,3 @@ const useIsMounted = (): () => boolean => {
 
   return useCallback(() => isMountedRef.current, []);
 };
-
-export default useIsMounted;

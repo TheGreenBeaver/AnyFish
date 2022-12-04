@@ -201,7 +201,8 @@ The returned value is an array, with the following values at each position:
 4. An object holding these properties:
    - `status` - the precise representation of the current state of the Promise. Can be `Pending`, `Processing`, `Resolved`
      or `Rejected`.
-   - `trigger` - a function allowing for manual launching of a new Promise.
+   - `trigger` - a function allowing for manual launching of a new Promise. Accepts the same arguments as the original
+     `promiseCreator`.
 
 ## useReRenderTrigger
 

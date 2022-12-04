@@ -1,4 +1,4 @@
-import useUpdate from '../src/use-update';
+import { useUpdate } from '../src/use-update';
 import type { Options } from '../src/use-update';
 import { renderHook } from '@testing-library/react';
 

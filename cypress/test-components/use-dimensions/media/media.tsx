@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import pic from './pic.jpg';
-import useDimensions from '../../../../src/use-dimensions';
+import { useDimensions } from '../../../../src/use-dimensions';
 import { UseDimensions } from '../../../constants';
 
 const Media: FC = () => {

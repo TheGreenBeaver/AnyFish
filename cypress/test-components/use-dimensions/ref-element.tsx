@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import useDimensions from '../../../src/use-dimensions';
+import { useDimensions } from '../../../src/use-dimensions';
 import { useState } from 'react';
 import { UseDimensions } from '../../constants';
 

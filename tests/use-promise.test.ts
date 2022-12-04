@@ -1,14 +1,22 @@
 import { getUniqueReturnedValues, spyOnSingle, waitMs } from './test-utils';
-import usePromise from '../src/use-promise';
+import type { HookResult} from '../src/use-promise';
+import { usePromise } from '../src/use-promise';
+import type { RenderHookResult } from '@testing-library/react';
 import { waitFor, renderHook } from '@testing-library/react';
+import isError from 'lodash/isError';
 
 describe('usePromise', () => {
+  const ERROR_MESSAGE = 'Error';
   const [usePromiseHook, promiseHookSpy] = spyOnSingle(usePromise);
 
   const timedPromiseCreator = (
     timeout: number,
   ) => new Promise(resolve => setTimeout(() => resolve(timeout), timeout));
   const [timedPromiseCreatorFn, timedPromiseCreatorSpy] = spyOnSingle(timedPromiseCreator);
+
+  const extractTrigger = <Arg>(
+    result: RenderHookResult<HookResult<unknown, [Arg]>, unknown>['result'],
+  ) => (arg: Arg) => result.current[3].trigger(arg);
 
   beforeEach(() => {
     promiseHookSpy.mockClear();
@@ -25,21 +33,20 @@ describe('usePromise', () => {
   });
 
   it('Should give access to rejected value', async () => {
-    const MESSAGE = 'Error';
-    const promiseCreator = () => Promise.reject(new Error(MESSAGE));
+    const promiseCreator = () => Promise.reject(new Error(ERROR_MESSAGE));
 
     const { result } = renderHook(() => usePromise(promiseCreator, []));
 
     await waitFor(() => {
       const errorData = result.current[1];
       expect(errorData).toBeInstanceOf(Error);
-      expect(errorData).toMatchObject({ message: MESSAGE });
+      expect(errorData).toMatchObject({ message: ERROR_MESSAGE });
     });
   });
 
   it('Should give access to promise status (in both shorthand and detailed form)', async () => {
     const { result } = renderHook(() => usePromise(timedPromiseCreator));
-    const trigger = (newTimeout: number) => result.current[3].trigger(newTimeout);
+    const trigger = extractTrigger(result);
     const TIMEOUT = 400;
 
     expect(result.current[2]).toBeFalsy();
@@ -73,6 +80,50 @@ describe('usePromise', () => {
     await waitFor(() => expect(result.current[0]).toBe(TIMEOUTS.third));
   });
 
+  it('Should cleanup the results of previous triggers', async () => {
+    const ADMIN = 'admin';
+    const SECRET_KEY = 'secret key';
+
+    const promiseCreator = async (username: string): Promise<string> => {
+      await waitMs(50);
+
+      if (username === ADMIN) {
+        return SECRET_KEY;
+      }
+
+      throw new Error(ERROR_MESSAGE);
+    };
+
+    const { result } = renderHook(() => usePromiseHook(promiseCreator));
+    const trigger = extractTrigger(result);
+
+    trigger('common user');
+    await waitFor(() => {
+      expect(result.current[0]).toBe(undefined);
+      expect(result.current[1]).toBeInstanceOf(Error);
+      expect(result.current[1]).toMatchObject({ message: ERROR_MESSAGE });
+    });
+
+    trigger(ADMIN);
+    await waitFor(() => {
+      expect(result.current[0]).toBe(SECRET_KEY);
+      expect(result.current[1]).toBe(undefined);
+    });
+
+    expect(getUniqueReturnedValues(promiseHookSpy, value => ({
+      data: value[0],
+      error: isError(value[1]) ? value[1].message : undefined,
+      isProcessing: value[2],
+      status: value[3].status,
+    }))).toEqual([
+      { data: undefined, error: undefined, isProcessing: false, status: usePromise.Status.Pending },
+      { data: undefined, error: undefined, isProcessing: true, status: usePromise.Status.Processing },
+      { data: undefined, error: ERROR_MESSAGE, isProcessing: false, status: usePromise.Status.Rejected },
+      { data: undefined, error: undefined, isProcessing: true, status: usePromise.Status.Processing },
+      { data: SECRET_KEY, error: undefined, isProcessing: false, status: usePromise.Status.Resolved },
+    ]);
+  });
+
   describe('usePromise.ResolveRace', () => {
     const TIMEOUTS = [500, 1000, 250] as const;
     const LAST = Math.max(...TIMEOUTS);
@@ -85,7 +136,7 @@ describe('usePromise', () => {
       const { result } = renderHook(() => usePromiseHook(
         timedPromiseCreatorFn, { resolveRace },
       ));
-      const trigger = (newTimeout: number) => result.current[3].trigger(newTimeout);
+      const trigger = extractTrigger(result);
 
       TIMEOUTS.forEach(trigger);
 

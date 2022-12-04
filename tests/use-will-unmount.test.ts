@@ -1,4 +1,4 @@
-import useWillUnmount from '../src/use-will-unmount';
+import { useWillUnmount } from '../src/use-will-unmount';
 import { renderHook } from '@testing-library/react';
 
 describe('useWillUnmount', () => {

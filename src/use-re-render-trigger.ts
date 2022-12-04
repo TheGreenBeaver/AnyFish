@@ -8,10 +8,8 @@ const description = 'seed';
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usererendertrigger
  */
-const useReRenderTrigger = (): () => void => {
+export const useReRenderTrigger = (): () => void => {
   const [, setSeed] = useState(Symbol(description));
 
   return useCallback(() => setSeed(Symbol(description)), []);
 };
-
-export default useReRenderTrigger;
