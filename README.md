@@ -1,6 +1,6 @@
 # AnyFish
 
-Utility React Hooks for any purpose.
+Utility React Hooks for any purpose. _There is a Hook for Any Fish._
 
 **Installation**
 

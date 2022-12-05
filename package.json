@@ -1,6 +1,6 @@
 {
   "name": "any-fish",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Utility React Hooks for any purpose",
   "keywords": [
     "react",
@@ -14,9 +14,9 @@
     "util",
     "utility"
   ],
-  "homepage": "https://github.com/TheGreenBeaver/any-fish#readme",
+  "homepage": "https://github.com/TheGreenBeaver/AnyFish#readme",
   "bugs": {
-    "url": "https://github.com/TheGreenBeaver/any-fish/issues"
+    "url": "https://github.com/TheGreenBeaver/AnyFish/issues"
   },
   "license": "MIT",
   "author": "https://github.com/TheGreenBeaver",
@@ -28,7 +28,7 @@
   "types": "./lib/esm/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TheGreenBeaver/any-fish.git"
+    "url": "git+https://github.com/TheGreenBeaver/AnyFish.git"
   },
   "scripts": {
     "build:base": "tsc -p ./tsconfig.prod.json",
