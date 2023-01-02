@@ -225,6 +225,34 @@ Returns a function that forces the Component to re-render when called.
 The hook is mostly meant for debugging purposes. Returns a function to access the amount of times the Component has
 rendered.
 
+## useSelectiveEffect
+
+### Call signature
+
+`(effect, deps, options) => void`
+
+### Description
+
+A convenience wrapper for [useEffect](https://reactjs.org/docs/hooks-reference.html#useeffect) that only triggers
+the `effect` when `deps` deeply change.
+
+### Arguments
+
+- **effect**: `() => (void | () => void)` - The effect to execute.
+- **deps**: `unknown[]` - The dependencies array.
+- **options** (_optional_): `Partial<Options>` - Adjustments for execution behaviour.
+
+### Type aliases
+
+- **Options**:
+  ```
+  {
+    compare: (prev: Deps, curr: Deps) => boolean
+  }
+  ```
+  `compare` defines how the change in `deps` is detected. _By default_,
+  [Lodash.isEqual](https://lodash.com/docs/4.17.15#isEqual) is used.
+
 ## useUpdate
 
 ### Call signature
@@ -238,7 +266,7 @@ updates should not trigger the effect.
 
 ### Arguments
 
-- **effect**: `() => void` - The effect to execute.
+- **effect**: `() => (void | () => void)` - The effect to execute.
 - **deps**: `unknown[]` - The dependencies array.
 - **options** (_optional_): `Partial<Options>` - Adjustments for execution behaviour.
 
