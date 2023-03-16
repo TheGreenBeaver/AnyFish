@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createGetOptions, use } from '../utils/misc';
 import isArray from 'lodash/isArray';
 import isNil from 'lodash/isNil';
+import isEqual from 'lodash/isEqual';
 
 export type Options<Data, Deps extends unknown[]> = Partial<{
   resolveRace: usePromise.ResolveRace,
@@ -12,6 +13,7 @@ export type Options<Data, Deps extends unknown[]> = Partial<{
   onError: (e: unknown) => void,
   onAny: () => void,
   skip: Usable<boolean, Deps>,
+  triggerOnSameDeps: boolean,
 }>;
 
 type More<Deps extends unknown[]> = {
@@ -68,12 +70,15 @@ export function usePromise <Data, Deps extends unknown[]>(
     onAny,
     skip,
     resolveRace,
+    triggerOnSameDeps,
   } = useMemo(() => getOptions(options), [options]);
 
   const [data, setData] = useMountedState<Optional<Data>>(undefined);
   const [error, setError] = useMountedState(undefined);
   const [status, setStatus] = useMountedState<usePromise.Status>(usePromise.Status.Pending);
+
   const lastPromiseRef = useRef<Optional<Promise<Data>>>(undefined);
+  const prevDepsRef = useRef<Optional<Deps>>(undefined);
 
   const trigger = useCallback(async (...args: Deps) => {
     if (resolveRace === usePromise.ResolveRace.TakeFirst && lastPromiseRef.current) {
@@ -117,11 +122,13 @@ export function usePromise <Data, Deps extends unknown[]>(
   }, [promiseCreator, resolveRace, onStart, onSuccess, onError, onAny, setData, setError, setStatus]);
 
   useEffect(() => {
-    if (deps && !use(skip, ...deps)) {
+    if (deps && !use(skip, ...deps) && (triggerOnSameDeps || !isEqual(deps, prevDepsRef.current))) {
       trigger(...deps);
     }
+
+    prevDepsRef.current = deps;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps ? [...deps, trigger, skip] : []);
+  }, deps ? [...deps, trigger, skip, triggerOnSameDeps] : []);
 
   return useMemo(
     () => [data, error, status === usePromise.Status.Processing, { trigger, status }],

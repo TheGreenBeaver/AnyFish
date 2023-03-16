@@ -9,7 +9,7 @@ describe('useDimensions', () => {
   };
 
   it('Should calculate size of media resources', () => {
-    cy.mount(<Media />);
+    cy.mount(<Media />, { strict: true });
     inspect(1920, 1080);
   });
 
@@ -38,7 +38,7 @@ describe('useDimensions', () => {
   };
 
   it('Should calculate size of dom elements', () => {
-    cy.mount(<RefElement />).then(cmp => {
+    cy.mount(<RefElement />, { strict: true }).then(cmp => {
       updateAndInspect();
 
       cmp.rerender(<RefElement throttle={500} />);

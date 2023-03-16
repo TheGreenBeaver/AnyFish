@@ -1,6 +1,6 @@
-import type { StringMapToUnion, Nullable } from '../utils/types';
+import type { StringMapToUnion, Nullable, Optional } from '../utils/types';
 import type { MutableRefObject, RefCallback } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import isFunction from 'lodash/isFunction';
 import isString from 'lodash/isString';
 import pick from 'lodash/pick';
@@ -63,6 +63,7 @@ export function useDimensions<T extends Element>(
   secondArg?: useDimensions.MediaKind,
 ) {
   const [dimensions, setDimensions] = useState<Nullable<Dimensions>>(null);
+  const elementRef = useRef<Optional<T>>(undefined);
 
   const isMedia = isString(firstArg);
   const originalRef = isMedia ? undefined : firstArg?.originalRef;
@@ -76,8 +77,8 @@ export function useDimensions<T extends Element>(
   [throttleDelay]);
 
   const resizeObserver = useMemo(() => new ResizeObserver((entries, observer) => {
-    entries.forEach((entry, index) => {
-      if (index !== entries.length - 1) {
+    entries.forEach(entry => {
+      if (entry.target !== elementRef.current) {
         observer.unobserve(entry.target);
       } else {
         enhancedSetDimensions(pick(entry.contentRect, keys));
@@ -85,7 +86,15 @@ export function useDimensions<T extends Element>(
     });
   }), [enhancedSetDimensions]);
 
-  useEffect(() => () => resizeObserver.disconnect(), [resizeObserver]);
+  useEffect(() => {
+    const element = elementRef.current;
+
+    if (element) {
+      resizeObserver.observe(element);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, [resizeObserver]);
 
   useEffect(() => {
     const measure = async () => {
@@ -122,9 +131,16 @@ export function useDimensions<T extends Element>(
     }
 
     if (instance) {
+      elementRef.current = instance;
       resizeObserver.observe(instance);
     } else {
       setDimensions(null);
+      const element = elementRef.current;
+
+      if (element) {
+        resizeObserver.unobserve(element);
+        elementRef.current = undefined;
+      }
     }
   }, [originalRef, resizeObserver]);
 

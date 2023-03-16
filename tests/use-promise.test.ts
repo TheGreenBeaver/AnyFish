@@ -4,6 +4,7 @@ import { usePromise } from '../src/use-promise';
 import type { RenderHookResult } from '@testing-library/react';
 import { waitFor, renderHook } from '@testing-library/react';
 import isError from 'lodash/isError';
+import { StrictMode } from 'react';
 
 describe('usePromise', () => {
   const ERROR_MESSAGE = 'Error';
@@ -17,6 +18,11 @@ describe('usePromise', () => {
   const extractTrigger = <Arg>(
     result: RenderHookResult<HookResult<unknown, [Arg]>, unknown>['result'],
   ) => (arg: Arg) => result.current[3].trigger(arg);
+
+  const expectToHaveError = (result: { current: HookResult<unknown, unknown[]> }, message: string = ERROR_MESSAGE) => {
+    expect(result.current[1]).toBeInstanceOf(Error);
+    expect(result.current[1]).toMatchObject({ message });
+  };
 
   beforeEach(() => {
     promiseHookSpy.mockClear();
@@ -37,11 +43,7 @@ describe('usePromise', () => {
 
     const { result } = renderHook(() => usePromise(promiseCreator, []));
 
-    await waitFor(() => {
-      const errorData = result.current[1];
-      expect(errorData).toBeInstanceOf(Error);
-      expect(errorData).toMatchObject({ message: ERROR_MESSAGE });
-    });
+    await waitFor(() => expectToHaveError(result));
   });
 
   it('Should give access to promise status (in both shorthand and detailed form)', async () => {
@@ -80,6 +82,28 @@ describe('usePromise', () => {
     await waitFor(() => expect(result.current[0]).toBe(TIMEOUTS.third));
   });
 
+  describe('Double triggers with same deps', () => {
+    it('Should only trigger once', async () => {
+      const promiseCreator = jest.fn();
+      renderHook(({ text }) => usePromise(promiseCreator, [text]), {
+        initialProps: { text: '' },
+        wrapper: StrictMode,
+      });
+      await waitFor(() => expect(promiseCreator).toHaveBeenCalledTimes(1));
+    });
+
+    it('Should trigger twice if forced', async () => {
+      const promiseCreator = jest.fn();
+      renderHook(({ text }) => usePromise(promiseCreator, [text], {
+        triggerOnSameDeps: true,
+      }), {
+        initialProps: { text: '' },
+        wrapper: StrictMode,
+      });
+      await waitFor(() => expect(promiseCreator).toHaveBeenCalledTimes(2));
+    });
+  });
+
   it('Should cleanup the results of previous triggers', async () => {
     const ADMIN = 'admin';
     const SECRET_KEY = 'secret key';
@@ -100,8 +124,7 @@ describe('usePromise', () => {
     trigger('common user');
     await waitFor(() => {
       expect(result.current[0]).toBe(undefined);
-      expect(result.current[1]).toBeInstanceOf(Error);
-      expect(result.current[1]).toMatchObject({ message: ERROR_MESSAGE });
+      expectToHaveError(result);
     });
 
     trigger(ADMIN);
