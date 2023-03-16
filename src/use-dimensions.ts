@@ -54,7 +54,7 @@ export function useDimensions(src: string, mediaKind?: useDimensions.MediaKind):
 /**
  * Returns a callback ref to pass to a DOM element and calculates the dimensions of that element.
  *
- * @version 1.0.0
+ * @version 1.2.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedimensions
  */
 export function useDimensions<T extends Element>(options?: Options<T>): [Nullable<Dimensions>, RefCallback<T>];

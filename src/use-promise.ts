@@ -38,7 +38,7 @@ const getOptions = createGetOptions({
 /**
  * Tracks the lifecycle of a Promise, handles data storing and error catching.
  *
- * @version 1.0.0
+ * @version 1.2.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usepromise
  */
 export function usePromise <Data, Deps extends unknown[]>(
@@ -48,7 +48,7 @@ export function usePromise <Data, Deps extends unknown[]>(
  * Tracks the lifecycle of a Promise, handles data storing and error catching and automatically triggers on `deps`
  * change.
  *
- * @version 1.0.0
+ * @version 1.2.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usepromise
  */
 export function usePromise <Data, Deps extends unknown[]>(

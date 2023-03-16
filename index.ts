@@ -4,6 +4,7 @@ export { useEventListener } from './src/use-event-listener';
 export { useIsMounted } from './src/use-is-mounted';
 export { useMountedState } from './src/use-mounted-state';
 export { usePersistentState } from './src/use-persistent-state';
+export { usePrevious } from './src/use-previous';
 export { usePromise } from './src/use-promise';
 export { useReRenderTrigger } from './src/use-re-render-trigger';
 export { useRenderCount } from './src/use-render-count';

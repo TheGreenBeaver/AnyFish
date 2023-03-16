@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useEventListener } from '../src/use-event-listener';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { StrictMode, useLayoutEffect, useRef, useState } from 'react';
 import { fireEvent, render, renderHook, waitFor } from '@testing-library/react';
 import type { Nullable } from '../utils/types';
 
@@ -42,7 +42,9 @@ describe('useEventListener', () => {
       );
     };
 
-    const { queryByText, getByText } = render(<Component />);
+    const { queryByText, getByText } = render(<Component />, {
+      wrapper: StrictMode,
+    });
     await waitFor(() => expect(queryByText(INDICATOR)).toBeInTheDocument());
 
     fireEvent.click(getByText(TEXT));
@@ -62,7 +64,9 @@ describe('useEventListener', () => {
       return <div ref={divRef}>{TEXT}</div>;
     };
 
-    const { getByText } = render(<Component />);
+    const { getByText } = render(<Component />, {
+      wrapper: StrictMode,
+    });
 
     const clickTrigger = () => fireEvent.click(getByText(TEXT));
 

@@ -149,6 +149,21 @@ a persistent browser storage (i. e. localStorage).
 
 Returned value is identical to [useState](https://reactjs.org/docs/hooks-reference.html#usestate).
 
+## usePrevious
+
+### Call signature
+
+`(value, initialValue) => (() => previousValue)`
+
+### Description
+
+Returns a function to access the previous value of a variable.
+
+### Arguments
+
+- **value**: `T` - Current value.
+- **initialValue** (_optional_): `T` - Initial value. _Defaults to_ `value`.
+
 ## usePromise
 
 ### Call signatures
@@ -178,6 +193,7 @@ the async function on their update.
     onError: (e) => void,
     onAny: () => void,
     skip: boolean | (...deps) => boolean,
+    triggerOnSameDeps: boolean,
   }
   ```
   `resolveRace` defines how the hook should behave if a new Promise is launched while some other one is already running.
@@ -189,7 +205,9 @@ the async function on their update.
   `onAny` is executed in the `final` block.  
   `skip` is either a flag or a function returning one, defining whether the automatic trigger should be skipped for the
   current set of dependencies. _By default_, each dependency in the array is checked to neither be `null`
-  nor `undefined`.
+  nor `undefined`.  
+  `triggerOnSameDeps` forces the hook to trigger the promise creator on shallow `deps` change even if current deps are
+  deep equal to the previous ones.
 
 ### Returned value
 
