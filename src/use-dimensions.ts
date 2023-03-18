@@ -77,11 +77,14 @@ export function useDimensions<T extends Element>(
   [throttleDelay]);
 
   const resizeObserver = useMemo(() => new ResizeObserver((entries, observer) => {
+    let elementIsObserved = false;
+
     entries.forEach(entry => {
-      if (entry.target !== elementRef.current) {
+      if (elementIsObserved || entry.target !== elementRef.current) {
         observer.unobserve(entry.target);
       } else {
         enhancedSetDimensions(pick(entry.contentRect, keys));
+        elementIsObserved = true;
       }
     });
   }), [enhancedSetDimensions]);

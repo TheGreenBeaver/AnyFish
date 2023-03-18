@@ -4,7 +4,7 @@ import { devConsole } from '../utils/misc';
 const cleanupWarning =
   'The effect passed to useDidMount returned with a non-empty value. ' +
   'If your effect needs cleanup, consider using plain useEffect: ' +
-  'https://reactjs.org/docs/hooks-reference.html#useeffect';
+  'https://react.dev/reference/react/useEffectt';
 
 /**
  * Executes the effect after the initial render.

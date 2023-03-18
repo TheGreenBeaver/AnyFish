@@ -7,14 +7,21 @@ export type Options = {
   nthUpdate: number,
   withCleanup: boolean,
   once: boolean,
+  isInStrictMode: boolean,
 };
 
-const getOptions = createGetOptions<Options>({ nthUpdate: 1, withCleanup: true, once: false });
+const getOptions = createGetOptions<Options>({ nthUpdate: 1, withCleanup: true, once: false, isInStrictMode: true });
+
+const getInitialUpdateCount = (options: Options): number => {
+  const extraRender = options.isInStrictMode && process.env.NODE_ENV !== 'production';
+
+  return (options?.nthUpdate ?? 1) + +extraRender;
+};
 
 /**
  * A convenience wrapper for {@link React.useEffect} when the first N `deps` updates should not trigger the effect.
  *
- * @version 1.0.0
+ * @version 1.2.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useupdate
  */
 export const useUpdate = (
@@ -22,8 +29,9 @@ export const useUpdate = (
   deps: unknown[],
   options?: Partial<Options>,
 ): (overrideOptions?: Partial<Options>) => void => {
-  const currentOptionsRef = useRef(getOptions(options));
-  const updateCountRef = useRef(options?.nthUpdate ?? 1);
+  const fullOptions = getOptions(options);
+  const currentOptionsRef = useRef(fullOptions);
+  const updateCountRef = useRef(getInitialUpdateCount(fullOptions));
 
   useEffect(() => {
     const shouldExecute = currentOptionsRef.current.once

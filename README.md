@@ -23,25 +23,28 @@ Executes the effect after the initial render.
 
 ### Arguments
 
-- **effect**: `() => void` - The effect to execute. The return value is ignored. Use
-  plain [useEffect](https://reactjs.org/docs/hooks-reference.html#useeffect) for effects that need cleanup.
+- **effect**: `() => void` - The effect to execute. The return value is ignored. Use plain
+  [useEffect](https://react.dev/reference/react/useEffect) for effects that need cleanup.
 
 ## useDimensions
 
 ### Call signatures
 
 1. `(src, mediaKind) => Dimensions | null`: Calculates the dimensions of a visual media object by its source.
-    - **src**: `string` - The media object source, same as the one passed to `<img />` or `<video />`.
-    - **mediaKind** (_optional_): `useDimensions.MediaKind` - Defines whether a Video or an Image is measured. _Defaults
-      to_ `MediaKind.Image`.
+
+- **src**: `string` - The media object source, same as the one passed to `<img />` or `<video />`.
+- **mediaKind** (_optional_): `useDimensions.MediaKind` - Defines whether a Video or an Image is measured. _Defaults
+  to_ `MediaKind.Image`.
+
 2. `(options) => [Dimensions | null, RefCallback]`: Returns a callback ref to pass to a DOM element and
    calculates the dimensions of that element.
-    - **options** (_optional_): `Partial<Options>` - Adjustments for measuring behaviour.
+
+- **options** (_optional_): `Partial<Options>` - Adjustments for measuring behaviour.
 
 ### Type aliases
 
 - **Dimensions**: `{ width: number, height: number }`
-- **Options**
+- **Options**:
   ```
   {
     originalRef: MutableRefObject | RefCallback,
@@ -49,10 +52,9 @@ Executes the effect after the initial render.
   }
   ```
   Pass `originalRef` if you need to use some extra ref logic alongside the one provided by the hook.  
-  `throttle` can serve for optimization purposes if the measured element's size changes very often.
-- **MutableRefObject**: Return type of [useRef](https://reactjs.org/docs/hooks-reference.html#useref) with a
-  non-`undefined` initial value.
-- [**RefCallback**](https://reactjs.org/docs/refs-and-the-dom.html#callback-refs)
+  `throttle` can serve for optimization purposes if the measured element's size changes too often.
+- **MutableRefObject**: Return type of [useRef](https://react.dev/reference/react/useRef).
+- [**RefCallback**](https://react.dev/reference/react-dom/components/common#ref-callback)
 
 ## useEventListener
 
@@ -102,12 +104,12 @@ Returns a function to access the mounted state of a functional component.
 
 ### Description
 
-A combination of plain [useState](https://reactjs.org/docs/hooks-reference.html#usestate)
+A combination of plain [useState](https://react.dev/reference/react/useState)
 and [useIsMounted](#useismounted). Useful for async operations like data fetching, when `setState` can potentially be
 called after the component has already unmounted, to avoid the "Cannot set state on an unmounted component" warnings and
 leaks.
 
-The call signature is identical to [useState](https://reactjs.org/docs/hooks-reference.html#usestate).
+The call signature is identical to [useState](https://react.dev/reference/react/useState).
 
 ## usePersistentState
 
@@ -117,7 +119,7 @@ The call signature is identical to [useState](https://reactjs.org/docs/hooks-ref
 
 ### Description
 
-A convenience wrapper for [useState](https://reactjs.org/docs/hooks-reference.html#usestate) that lets you keep data in
+A convenience wrapper for [useState](https://react.dev/reference/react/useState) that lets you keep data in
 a persistent browser storage (i. e. localStorage).
 
 ### Arguments
@@ -140,14 +142,14 @@ a persistent browser storage (i. e. localStorage).
   default_, localStorage is used.  
   `serializer` allows for customizing the way the data is serialized and deserialized. _By default_, this is done via
   JSON.  
-  `cleanup` defines whether the stored value should be cleaned up when `options.storage`, `options.serializer` or `key`
-  change. _Defaults to_ `true`.  
+  `cleanup` defines whether the stored value should be cleaned up whenever `options.storage`, `options.serializer`
+  or `key` change. _Defaults to_ `true`.  
   `clearOnParsingError` defines whether the stored data should be cleared if the `serializer` fails to parse it.
   _Defaults to_ `true`.
 
 ### Returned value
 
-Returned value is identical to [useState](https://reactjs.org/docs/hooks-reference.html#usestate).
+Returned value is identical to [useState](https://react.dev/reference/react/useState).
 
 ## usePrevious
 
@@ -192,7 +194,7 @@ the async function on their update.
     onSuccess: (result) => void,
     onError: (e) => void,
     onAny: () => void,
-    skip: boolean | (...deps) => boolean,
+    skip: boolean | ((...deps) => boolean),
     triggerOnSameDeps: boolean,
   }
   ```
@@ -206,8 +208,8 @@ the async function on their update.
   `skip` is either a flag or a function returning one, defining whether the automatic trigger should be skipped for the
   current set of dependencies. _By default_, each dependency in the array is checked to neither be `null`
   nor `undefined`.  
-  `triggerOnSameDeps` forces the hook to trigger the promise creator on shallow `deps` change even if current deps are
-  deep equal to the previous ones.
+  `triggerOnSameDeps` forces the hook to trigger the promise creator on **shallow** `deps` change even if current deps
+  are **deep** equal to the previous ones.
 
 ### Returned value
 
@@ -216,11 +218,11 @@ The returned value is an array, with the following values at each position:
 1. The resolved data (or `undefined`, if no Promise has resolved yet).
 2. The error (or whatever other value the Promise rejects with).
 3. A flag representing the "processing" state of the Promise.
-4. An object holding these properties:
-   - `status` - the precise representation of the current state of the Promise. Can be `Pending`, `Processing`, `Resolved`
-     or `Rejected`.
-   - `trigger` - a function allowing for manual launching of a new Promise. Accepts the same arguments as the original
-     `promiseCreator`.
+4. An object holding the following properties:
+  - `status` - the precise representation of the current state of the Promise. Can
+    be `Pending`, `Processing`, `Resolved` or `Rejected`.
+  - `trigger` - a function allowing for manual launching of a new Promise. Accepts the same arguments as the original
+    `promiseCreator`.
 
 ## useReRenderTrigger
 
@@ -251,12 +253,12 @@ rendered.
 
 ### Description
 
-A convenience wrapper for [useEffect](https://reactjs.org/docs/hooks-reference.html#useeffect) that only triggers
-the `effect` when `deps` deeply change.
+A convenience wrapper for [useEffect](https://react.dev/reference/react/useEffect) that only triggers
+the `effect` when `deps` **deeply** change.
 
 ### Arguments
 
-- **effect**: `() => (void | () => void)` - The effect to execute.
+- **effect**: `() => (void | (() => void))` - The effect to execute.
 - **deps**: `unknown[]` - The dependencies array.
 - **options** (_optional_): `Partial<Options>` - Adjustments for execution behaviour.
 
@@ -279,12 +281,12 @@ the `effect` when `deps` deeply change.
 
 ### Description
 
-A convenience wrapper for [useEffect](https://reactjs.org/docs/hooks-reference.html#useeffect) when the first N `deps`
+A convenience wrapper for [useEffect](https://react.dev/reference/react/useEffect) when the first N `deps`
 updates should not trigger the effect.
 
 ### Arguments
 
-- **effect**: `() => (void | () => void)` - The effect to execute.
+- **effect**: `() => (void | (() => void))` - The effect to execute.
 - **deps**: `unknown[]` - The dependencies array.
 - **options** (_optional_): `Partial<Options>` - Adjustments for execution behaviour.
 
@@ -296,6 +298,7 @@ updates should not trigger the effect.
     nthUpdate: number,
     withCleanup: boolean,
     once: boolean,
+    isInStrictMode: boolean,
   }
   ```
   `nthUpdate` defines which change of `deps` should first trigger the `effect`. The count is 0-based: render №0 is the
@@ -304,10 +307,14 @@ updates should not trigger the effect.
   to_ `true`.  
   If `once` is set to `true`, the effect and its cleanup will only be executed once after the Nth update. _Defaults
   to_ `false`.
+  `isInStrictMode` defines whether the hook is used within [StrictMode](https://react.dev/reference/react/StrictMode);
+  unfortunately, this can't be detected automatically, while it is essential when calculating which render should
+  trigger the effect. _Defaults to_ `true`.
 
 ### Returned value
 
-Returned value is a function allowing you to reset the counter and potentially update the used options.
+Returned value is a function allowing you to reset the counter and, if you need to, update the used options for the next
+cycle.
 
 ## useWillUnmount
 
@@ -327,7 +334,8 @@ Executes the effect before the component unmounts.
 
 The package exposes a `Settings` object. You can modify it to refine some global behaviour. The following settings are
 available:
+
 - **isDev**: `((method) => boolean) | boolean` - Either a flag or a function returning one, defining whether the app is
-running in development environment. All the console messages generated by the hooks will be omitted in non-dev
-environments. `method` is the name of console logging method used (`log`, `error`, `warn` etc.). _By default_, the app
-is considered to be in development if `process.env.NODE_ENV` is `development`.
+  running in development environment. All the console messages generated by the hooks will be omitted in non-dev
+  environments. `method` is the name of console logging method used (`log`, `error`, `warn` etc.). _By default_, the app
+  is considered to be in development if `process.env.NODE_ENV` is `development`.

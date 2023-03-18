@@ -1,6 +1,7 @@
 import { useUpdate } from '../src/use-update';
 import type { Options } from '../src/use-update';
 import { renderHook } from '@testing-library/react';
+import { StrictMode } from 'react';
 
 describe('useUpdate', () => {
   const cleanup = jest.fn();
@@ -18,6 +19,7 @@ describe('useUpdate', () => {
 
     const { rerender, result } = renderHook(({ foo }) => useUpdate(() => effect(foo), [foo], options), {
       initialProps: { foo: currentFoo },
+      wrapper: StrictMode,
     });
 
     return [
