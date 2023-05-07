@@ -16,7 +16,7 @@ const defaultSerializer = {
 };
 
 const getOptions = createGetOptions({
-  storage: localStorage,
+  storage: typeof localStorage === 'undefined' ? undefined : localStorage,
   serializer: defaultSerializer,
   cleanup: true,
   clearOnParsingError: true,
@@ -25,7 +25,7 @@ const getOptions = createGetOptions({
 /**
  * A convenience wrapper for {@link React.useState} that lets you keep data in a persistent browser storage.
  *
- * @version 1.0.0
+ * @version 1.2.2
  * @see https://github.com/TheGreenBeaver/AnyFish#usepersistentstate
  */
 export const usePersistentState = <S>(
