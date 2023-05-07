@@ -16,7 +16,7 @@ const defaultSerializer = {
 };
 
 const getOptions = createGetOptions({
-  storage: typeof localStorage === 'undefined' ? undefined : localStorage,
+  storage: typeof window === 'undefined' ? undefined : localStorage,
   serializer: defaultSerializer,
   cleanup: true,
   clearOnParsingError: true,
