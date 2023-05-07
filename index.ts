@@ -2,6 +2,7 @@ export { useDidMount } from './src/use-did-mount';
 export { useDimensions } from './src/use-dimensions';
 export { useEventListener } from './src/use-event-listener';
 export { useIsMounted } from './src/use-is-mounted';
+export { useMediaQuery } from './src/use-media-query';
 export { useMountedState } from './src/use-mounted-state';
 export { usePersistentState } from './src/use-persistent-state';
 export { usePrevious } from './src/use-previous';

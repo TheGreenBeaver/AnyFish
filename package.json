@@ -1,20 +1,23 @@
 {
   "name": "any-fish",
-  "version": "1.2.2-gamma",
+  "version": "1.3.0",
   "description": "Utility React Hooks for any purpose",
   "keywords": [
     "react",
     "reactjs",
     "hooks",
     "hook",
+    "react-hooks",
     "usePromise",
-    "persistent state",
+    "useAsync",
+    "persistent-state",
     "isMounted",
-    "element size",
+    "element-size",
     "dimensions",
-    "previous state",
+    "previous-state",
     "util",
-    "utility"
+    "utility",
+    "typescript"
   ],
   "homepage": "https://github.com/TheGreenBeaver/AnyFish#readme",
   "bugs": {

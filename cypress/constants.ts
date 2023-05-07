@@ -55,3 +55,12 @@ export const UsePersistentState = {
   }),
   indicatorText: 'CORRECT',
 };
+
+export const UseMediaQuery = {
+  elements: createSelectorProvider({
+    firstIndicatorId: 'indicator-1',
+    secondIndicatorId: 'indicator-2',
+  }),
+  trueText: 'True',
+  falseText: 'False',
+};
