@@ -1,3 +1,5 @@
+import type { Dispatch, SetStateAction } from 'react';
+
 export type Nullable<T> = T | null;
 
 export type Optional<T> = T | undefined;
@@ -33,3 +35,5 @@ export type ExclusiveUnion<Options extends StringMap[]> = StringMapToUnion<Exclu
 export type Usable<T, Args extends unknown[] = []> = T | ((...args: Args) => T);
 
 export type MapKey = string | number | symbol;
+
+export type SetState<T> = Dispatch<SetStateAction<T>>;

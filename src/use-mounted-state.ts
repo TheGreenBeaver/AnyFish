@@ -1,6 +1,6 @@
-import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useState } from 'react';
 import { useIsMounted } from './use-is-mounted';
+import type { SetState, Usable } from '../utils/types';
 
 /**
  * A combination of plain {@link React.useState} and {@link useIsMounted}.
@@ -11,12 +11,12 @@ import { useIsMounted } from './use-is-mounted';
  * @see https://github.com/TheGreenBeaver/AnyFish#usemountedstate
  */
 export const useMountedState = <T>(
-  initialState: T | (() => T),
-): [T, Dispatch<SetStateAction<T>>] => {
+  initialState: Usable<T>,
+): [T, SetState<T>] => {
   const [data, setData] = useState<T>(initialState);
   const getIsMounted = useIsMounted();
 
-  const setDataIfMounted: Dispatch<SetStateAction<T>> = useCallback(value => {
+  const setDataIfMounted: SetState<T> = useCallback(value => {
     if (getIsMounted()) {
       setData(value);
     }

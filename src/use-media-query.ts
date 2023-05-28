@@ -11,7 +11,19 @@ type ChangeListener = (changeEvent: MediaQueryListEvent) => void;
 
 const getOptions = createGetOptions({ track: true });
 
+/**
+ * Checks if window matches provided media query.
+ *
+ * @version 1.3.0
+ * @see https://github.com/TheGreenBeaver/AnyFish#usemediaquery
+ */
 export function useMediaQuery(mediaQuerySource: string, options?: Partial<Options>): boolean;
+/**
+ * Checks if window matches each of the provided media queries.
+ *
+ * @version 1.3.0
+ * @see https://github.com/TheGreenBeaver/AnyFish#usemediaquery
+ */
 export function useMediaQuery<Keys extends string>(
   mediaQuerySource: Record<Keys, string>,
   options?: Partial<Options>,
@@ -21,10 +33,16 @@ export function useMediaQuery<Keys extends string>(
   options?: Partial<Options>,
 ) {
   const { track } = getOptions(options);
-  const [matchesQuery, setMatchesQuery] = useState(() => isString(mediaQuerySource)
-    ? window.matchMedia(mediaQuerySource).matches
-    : mapValues(mediaQuerySource, queryString => window.matchMedia(queryString).matches),
-  );
+
+  const [matchesQuery, setMatchesQuery] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return isString(mediaQuerySource)
+      ? window.matchMedia(mediaQuerySource).matches
+      : mapValues(mediaQuerySource, queryString => window.matchMedia(queryString).matches);
+  });
 
   useEffect(() => {
     if (isString(mediaQuerySource)) {

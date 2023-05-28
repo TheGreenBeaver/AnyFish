@@ -46,7 +46,7 @@ export const useUpdate = (
       }
     }
 
-    return;
+    return undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 

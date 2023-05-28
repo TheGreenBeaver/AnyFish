@@ -1,3 +1,5 @@
+export { useBoolean } from './src/use-boolean';
+export { useDelayedValue } from './src/use-delayed-value';
 export { useDidMount } from './src/use-did-mount';
 export { useDimensions } from './src/use-dimensions';
 export { useEventListener } from './src/use-event-listener';
@@ -13,6 +15,7 @@ export { useSelectiveEffect } from './src/use-selective-effect';
 export { useUpdate } from './src/use-update';
 export { useWillUnmount } from './src/use-will-unmount';
 
+export type { Options as UseDelayedValueOptions } from './src/use-delayed-value';
 export type { Dimensions, Options as UseDimensionsOptions } from './src/use-dimensions';
 export type { Target as ListenerTarget } from './src/use-event-listener';
 export type { Options as UsePromiseOptions, HookResult as UsePromiseResult } from './src/use-promise';

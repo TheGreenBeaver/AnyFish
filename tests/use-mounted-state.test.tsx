@@ -1,31 +1,8 @@
 import { useMountedState } from '../src/use-mounted-state';
-import type { Dispatch, FC, SetStateAction } from 'react';
+import type { FC } from 'react';
 import { useEffect } from 'react';
 import { createSwitchingComponents, extractLastResult, spyOnSingle, waitMs } from './test-utils';
 import { fireEvent } from '@testing-library/react';
-
-type EnhancedInit<S> = (
-  S | (() => S)
-) & {
-  onSetState?: CallableFunction,
-};
-
-jest.mock('react', () => {
-  const originalReact = jest.requireActual('react');
-
-  return {
-    ...originalReact,
-    useState: function <S>(initialState: EnhancedInit<S>): [S, Dispatch<SetStateAction<S>>] {
-      const [state, setState] = originalReact.useState(initialState);
-
-      const enhancedSetState: Dispatch<SetStateAction<S>> = v => {
-        initialState.onSetState?.(v);
-        setState(v);
-      };
-      return [state, enhancedSetState];
-    },
-  };
-});
 
 describe('useMountedState', () => {
   it('Should only update state if the component is still mounted', async () => {

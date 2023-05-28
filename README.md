@@ -11,6 +11,27 @@ Utility React Hooks for any purpose. _There is a Hook for Any Fish._
 
 The package is written in TypeScript, so no additional @types packages are needed.
 
+## useBoolean
+
+### Call signature
+
+`(initialState) => [boolean, SwitchToTrue, SwitchToFalse, Toggle, Dispatch<SetStateAction<boolean>>]`
+
+### Description
+
+A convenience wrapper for [useState](https://react.dev/reference/react/useState) to manage boolean flags.
+
+### Arguments
+
+- **initialState** (_optional_): `boolean | (() => boolean)` - same as you'd pass to `useState<boolean>`. _Defaults to_
+  `false`.
+
+### Type aliases
+
+**SwitchToTrue**, **SwitchToFalse**, **Toggle** are all just plain void functions (`() => void`). **SwitchToTrue** sets
+the flag value to `true`, **SwitchToFalse** sets it to `false`, and **Toggle** sets it to be the opposite of the current
+value.
+
 ## useDidMount
 
 ### Call signature
@@ -31,15 +52,13 @@ Executes the effect after the initial render.
 ### Call signatures
 
 1. `(src, mediaKind) => Dimensions | null`: Calculates the dimensions of a visual media object by its source.
-
-- **src**: `string` - The media object source, same as the one passed to `<img />` or `<video />`.
-- **mediaKind** (_optional_): `useDimensions.MediaKind` - Defines whether a Video or an Image is measured. _Defaults
-  to_ `MediaKind.Image`.
+   - **src**: `string` - The media object source, same as the one passed to `<img />` or `<video />`.
+   - **mediaKind** (_optional_): `useDimensions.MediaKind` - Defines whether a Video or an Image is measured. _Defaults
+     to_ `MediaKind.Image`.
 
 2. `(options) => [Dimensions | null, RefCallback]`: Returns a callback ref to pass to a DOM element and
    calculates the dimensions of that element.
-
-- **options** (_optional_): `Partial<Options>` - Adjustments for measuring behaviour.
+   - **options** (_optional_): `Partial<Options>` - Adjustments for measuring behaviour.
 
 ### Type aliases
 
@@ -135,6 +154,7 @@ a persistent browser storage (i. e. localStorage).
     storage: Storage,
     serializer: { stringify: (value: State) => string, parse: (serialized: string) => State },
     cleanup: boolean,
+    follow: boolean,
     clearOnParsingError: boolean,
   }
   ```
@@ -144,6 +164,8 @@ a persistent browser storage (i. e. localStorage).
   JSON.  
   `cleanup` defines whether the stored value should be cleaned up whenever `options.storage`, `options.serializer`
   or `key` change. _Defaults to_ `true`.  
+  `follow` defines whether the state value should be updated whenever `options.storage`, `options.serializer` or `key`
+  change to whatever is stored at that "new address". _Defaults to_ `false`.  
   `clearOnParsingError` defines whether the stored data should be cleared if the `serializer` fails to parse it.
   _Defaults to_ `true`.
 

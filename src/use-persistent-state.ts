@@ -1,12 +1,13 @@
-import type { Dispatch, SetStateAction} from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createGetOptions, devConsole, use } from '../utils/misc';
-import type { Usable } from '../utils/types';
+import type { SetState, Usable } from '../utils/types';
+import { usePrevious } from './use-previous';
 
 type Options<S> = {
   storage: Storage,
   serializer: { stringify: (value: S) => string, parse: (serialized: string) => S },
   cleanup: boolean,
+  follow: boolean,
   clearOnParsingError: boolean,
 };
 
@@ -16,26 +17,41 @@ const defaultSerializer = {
 };
 
 const getOptions = createGetOptions({
-  storage: typeof localStorage === 'undefined' ? undefined : localStorage,
   serializer: defaultSerializer,
   cleanup: true,
+  follow: false,
   clearOnParsingError: true,
-}) as <S>(providedOptions?: Partial<Options<S>>) => Options<S>;
+}) as <S>(providedOptions?: Partial<Options<S>>) => Omit<Options<S>, 'storage'> & { storage?: Storage };
 
 /**
  * A convenience wrapper for {@link React.useState} that lets you keep data in a persistent browser storage.
  *
- * @version 1.2.2
+ * @version 1.3.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usepersistentstate
  */
 export const usePersistentState = <S>(
   initialValue: Usable<S>,
   key: string,
   options?: Partial<Options<S>>,
-): [S, Dispatch<SetStateAction<S>>] => {
-  const { storage, serializer, cleanup, clearOnParsingError } = useMemo(() => getOptions<S>(options), [options]);
+): [S, SetState<S>] => {
+  const {
+    storage: providedStorage,
+    serializer,
+    cleanup,
+    follow,
+    clearOnParsingError,
+  } = useMemo(() => getOptions<S>(options), [options]);
 
-  const [value, setValue] = useState<S>(() => {
+  const storage = providedStorage ?? (typeof localStorage === 'undefined' ? undefined : localStorage);
+
+  const getPrevStorage = usePrevious(storage);
+  const getPrevKey = usePrevious(key);
+
+  const getStoredValue = useCallback((fallback: Usable<S> = initialValue) => {
+    if (!storage) {
+      return use(fallback);
+    }
+
     const storedData = storage.getItem(key);
 
     if (storedData != null) {
@@ -50,13 +66,15 @@ export const usePersistentState = <S>(
       }
     }
 
-    return use(initialValue);
-  });
+    return use(fallback);
+  }, [clearOnParsingError, storage, initialValue, key, serializer]);
+
+  const [value, setValue] = useState<S>(getStoredValue);
 
   useEffect(() => {
-    const lastStorage = storage;
-    const lastKey = key;
-    const lastSerializer = serializer;
+    if (!storage) {
+      return undefined;
+    }
 
     try {
       storage.setItem(key, serializer.stringify(value));
@@ -64,17 +82,22 @@ export const usePersistentState = <S>(
       devConsole.error(`Failed to stringify the current value of usePersistentState to store at ${key}\n`, e);
     }
 
-    return () => {
-      if (cleanup && (
-        lastStorage !== storage ||
-        lastKey !== key ||
-        lastSerializer !== serializer
-      )) {
-        storage.removeItem(key);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, storage, value, serializer]);
+    return undefined;
+  }, [storage, key, serializer, value]);
+
+  useEffect(() => {
+    if (follow || !getPrevStorage() && storage) {
+      setValue(getStoredValue);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, serializer, storage, getPrevStorage]);
+
+  useEffect(() => {
+    if (cleanup) {
+      getPrevStorage()?.removeItem(getPrevKey());
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, serializer, storage, getPrevStorage, getPrevKey]);
 
   return [value, setValue];
 };

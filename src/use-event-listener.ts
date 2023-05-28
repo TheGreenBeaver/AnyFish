@@ -72,7 +72,7 @@ export function useEventListener (
 /**
  * Adds the provided listeners to window and performs automatic cleanup.
  *
- * @version 1.0.0
+ * @version 1.3.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 export function useEventListener (
@@ -83,7 +83,7 @@ export function useEventListener (
 /**
  * Adds the provided listener to window and performs automatic cleanup.
  *
- * @version 1.0.0
+ * @version 1.3.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 export function useEventListener (
@@ -94,7 +94,7 @@ export function useEventListener (
 /**
  * Adds the provided listeners to window and performs automatic cleanup.
  *
- * @version 1.0.0
+ * @version 1.3.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 export function useEventListener (
@@ -109,7 +109,7 @@ export function useEventListener (
   fourthArg?: Options | EventListenerOrEventListenerObject,
   ...rest: ManyListeners
 ) {
-  const targetAccessor = useMemo(() => isString(firstArg) ? window : firstArg, [firstArg]);
+  const getTargetAccessor = useCallback(() => isString(firstArg) ? window : firstArg, [firstArg]);
   const eventName = useMemo(() => [firstArg, secondArg].find(isString) as string, [firstArg, secondArg]);
   const options = useMemo(() => [secondArg, thirdArg, fourthArg].find(isOptions), [secondArg, thirdArg, fourthArg]);
 
@@ -119,9 +119,11 @@ export function useEventListener (
   }, [secondArg, thirdArg, fourthArg, rest]);
 
   useEffect(() => {
+    // Effects are only executed at client side, so this is guaranteed to return non-undefined window
+    const targetAccessor = getTargetAccessor();
     const currentTarget = isObjectWithKey(targetAccessor, 'current', false) ? targetAccessor.current : targetAccessor;
     currentTarget?.addEventListener(eventName, combinedEventListener, options);
 
     return () => currentTarget?.removeEventListener(eventName, combinedEventListener, options);
-  }, [targetAccessor, eventName, combinedEventListener, options]);
+  }, [getTargetAccessor, eventName, combinedEventListener, options]);
 }

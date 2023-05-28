@@ -54,7 +54,7 @@ export function useDimensions(src: string, mediaKind?: useDimensions.MediaKind):
 /**
  * Returns a callback ref to pass to a DOM element and calculates the dimensions of that element.
  *
- * @version 1.2.0
+ * @version 1.3.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedimensions
  */
 export function useDimensions<T extends Element>(options?: Options<T>): [Nullable<Dimensions>, RefCallback<T>];
@@ -76,20 +76,30 @@ export function useDimensions<T extends Element>(
     : throttle(setDimensions, throttleDelay),
   [throttleDelay]);
 
-  const resizeObserver = useMemo(() => new ResizeObserver((entries, observer) => {
-    let elementIsObserved = false;
+  const resizeObserver = useMemo(() => {
+    if (typeof ResizeObserver === 'undefined') {
+      return null;
+    }
 
-    entries.forEach(entry => {
-      if (elementIsObserved || entry.target !== elementRef.current) {
-        observer.unobserve(entry.target);
-      } else {
-        enhancedSetDimensions(pick(entry.contentRect, keys));
-        elementIsObserved = true;
-      }
+    return new ResizeObserver((entries, observer) => {
+      let elementIsObserved = false;
+
+      entries.forEach(entry => {
+        if (elementIsObserved || entry.target !== elementRef.current) {
+          observer.unobserve(entry.target);
+        } else {
+          enhancedSetDimensions(pick(entry.contentRect, keys));
+          elementIsObserved = true;
+        }
+      });
     });
-  }), [enhancedSetDimensions]);
+  }, [enhancedSetDimensions]);
 
   useEffect(() => {
+    if (!resizeObserver) {
+      return undefined;
+    }
+
     const element = elementRef.current;
 
     if (element) {
@@ -135,13 +145,13 @@ export function useDimensions<T extends Element>(
 
     if (instance) {
       elementRef.current = instance;
-      resizeObserver.observe(instance);
+      resizeObserver?.observe(instance);
     } else {
       setDimensions(null);
       const element = elementRef.current;
 
       if (element) {
-        resizeObserver.unobserve(element);
+        resizeObserver?.unobserve(element);
         elementRef.current = undefined;
       }
     }
