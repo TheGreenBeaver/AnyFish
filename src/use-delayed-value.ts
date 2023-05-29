@@ -2,8 +2,9 @@ import { useCallback } from 'react';
 import throttle from 'lodash/throttle';
 import debounce from 'lodash/debounce';
 import { createGetOptions } from '../utils/misc';
-import type { SetState, Usable } from '../utils/types';
+import type { Optional, SetState, Usable } from '../utils/types';
 import { useMountedState } from './use-mounted-state';
+import type { DebouncedFunc } from 'lodash';
 
 const delayFunctions = {
   throttle,
@@ -11,7 +12,7 @@ const delayFunctions = {
 } as const;
 
 type DelayFnName = keyof typeof delayFunctions;
-export type HookResult<T> = [T, SetState<T>, SetState<T>];
+export type HookResult<T> = [T, DebouncedFunc<SetState<T>>, SetState<T>];
 
 export type Options = {
   delay: number,
@@ -38,7 +39,7 @@ export function useDelayedValue<T>(
  * @version 1.3.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedelayedvalue
  */
-export function useDelayedValue<T = undefined>(): HookResult<T | undefined>;
+export function useDelayedValue<T = undefined>(): HookResult<Optional<T>>;
 export function useDelayedValue <T>(
   initialState?: Usable<T>,
   options?: Partial<Options>,

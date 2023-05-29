@@ -71,10 +71,10 @@ export function useDimensions<T extends Element>(
   const src = isMedia ? firstArg : undefined;
   const mediaKind = isMedia ? secondArg || useDimensions.MediaKind.Image : undefined;
 
-  const enhancedSetDimensions = useMemo(() => throttleDelay == null
-    ? setDimensions
-    : throttle(setDimensions, throttleDelay),
-  [throttleDelay]);
+  const enhancedSetDimensions = useMemo(
+    () => throttleDelay == null ? setDimensions : throttle(setDimensions, throttleDelay),
+    [throttleDelay],
+  );
 
   const resizeObserver = useMemo(() => {
     if (typeof ResizeObserver === 'undefined') {
@@ -111,24 +111,26 @@ export function useDimensions<T extends Element>(
 
   useEffect(() => {
     const measure = async () => {
-      if (mediaKind != null && src != null) {
-        setDimensions(null);
-        const { create, eventName } = configs[mediaKind];
-
-        const measurable = create();
-        try {
-          const newDimensions = await new Promise<Dimensions>((resolve, reject) => {
-            measurable.addEventListener(eventName, () => resolve(pick(measurable, keys)));
-            measurable.addEventListener('error', reject);
-            measurable.src = src;
-          });
-
-          setDimensions(newDimensions);
-        } catch (e) {
-          devConsole.error(`Failed to load media at ${src}`);
-        }
-        measurable.remove();
+      if (mediaKind == null || src == null) {
+        return;
       }
+
+      setDimensions(null);
+      const { create, eventName } = configs[mediaKind];
+
+      const measurable = create();
+      try {
+        const newDimensions = await new Promise<Dimensions>((resolve, reject) => {
+          measurable.addEventListener(eventName, () => resolve(pick(measurable, keys)));
+          measurable.addEventListener('error', reject);
+          measurable.src = src;
+        });
+
+        setDimensions(newDimensions);
+      } catch (e) {
+        devConsole.error(`Failed to load media at ${src}`);
+      }
+      measurable.remove();
     };
 
     measure();

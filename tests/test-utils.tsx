@@ -1,4 +1,4 @@
-import type { ExclusiveUnion, StringMap, SimpleFunction, SetState, Usable } from '../utils/types';
+import type { ExclusiveUnion, StringMap, SimpleFunction } from '../utils/types';
 import type { FC } from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { fireEvent, render } from '@testing-library/react';
@@ -66,52 +66,4 @@ export function getUniqueReturnedValues <Result, Adjusted = Result>(
   adjust: (value: Result) => Adjusted = identity,
 ): Adjusted[] {
   return Array.from(new Set(spy.mock.results.map(result => result.value))).map(value => adjust(value));
-}
-
-export const makeUseStateTrackable = (_jest: typeof jest) => {
-  type EnhancedInit<S> = (
-    Usable<S>
-  ) & {
-    onSetState?: CallableFunction,
-  };
-
-  _jest.mock('react', () => {
-    const originalReact = _jest.requireActual('react');
-
-    return {
-      ...originalReact,
-      useState: function <S>(initialState: EnhancedInit<S>): [S, SetState<S>] {
-        const [state, setState] = originalReact.useState(initialState);
-
-        const enhancedSetState: SetState<S> = v => {
-          initialState.onSetState?.(v);
-          setState(v);
-        };
-        return [state, enhancedSetState];
-      },
-    };
-  });
-};
-
-type EnhancedInit<S> = (
-  Usable<S>
-) & {
-  onSetState?: CallableFunction,
-};
-
-export const getTrackableUseState = () => {
-  const originalReact = jest.requireActual('react');
-
-  return {
-    ...originalReact,
-    useState: function <S>(initialState: EnhancedInit<S>): [S, SetState<S>] {
-      const [state, setState] = originalReact.useState(initialState);
-
-      const enhancedSetState: SetState<S> = v => {
-        initialState.onSetState?.(v);
-        setState(v);
-      };
-      return [state, enhancedSetState];
-    },
-  };
 }

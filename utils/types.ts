@@ -37,3 +37,5 @@ export type Usable<T, Args extends unknown[] = []> = T | ((...args: Args) => T);
 export type MapKey = string | number | symbol;
 
 export type SetState<T> = Dispatch<SetStateAction<T>>;
+
+export type SetStateResult<T> = [T, SetState<T>];

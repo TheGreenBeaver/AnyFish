@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createGetOptions, devConsole, use } from '../utils/misc';
-import type { SetState, Usable } from '../utils/types';
-import { usePrevious } from './use-previous';
+import type { SetStateResult, Usable } from '../utils/types';
 
 type Options<S> = {
   storage: Storage,
@@ -33,7 +32,7 @@ export const usePersistentState = <S>(
   initialValue: Usable<S>,
   key: string,
   options?: Partial<Options<S>>,
-): [S, SetState<S>] => {
+): SetStateResult<S> => {
   const {
     storage: providedStorage,
     serializer,
@@ -44,8 +43,16 @@ export const usePersistentState = <S>(
 
   const storage = providedStorage ?? (typeof localStorage === 'undefined' ? undefined : localStorage);
 
-  const getPrevStorage = usePrevious(storage);
-  const getPrevKey = usePrevious(key);
+  const prevStorageRef = useRef(storage);
+  const prevKeyRef = useRef(key);
+
+  useEffect(() => {
+    prevStorageRef.current = storage;
+  }, [storage]);
+
+  useEffect(() => {
+    prevKeyRef.current = key;
+  }, [key]);
 
   const getStoredValue = useCallback((fallback: Usable<S> = initialValue) => {
     if (!storage) {
@@ -73,7 +80,7 @@ export const usePersistentState = <S>(
 
   useEffect(() => {
     if (!storage) {
-      return undefined;
+      return;
     }
 
     try {
@@ -81,23 +88,21 @@ export const usePersistentState = <S>(
     } catch (e) {
       devConsole.error(`Failed to stringify the current value of usePersistentState to store at ${key}\n`, e);
     }
-
-    return undefined;
   }, [storage, key, serializer, value]);
 
   useEffect(() => {
-    if (follow || !getPrevStorage() && storage) {
+    if (follow || !prevStorageRef.current && storage) {
       setValue(getStoredValue);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, serializer, storage, getPrevStorage]);
+  }, [key, serializer, storage]);
 
   useEffect(() => {
     if (cleanup) {
-      getPrevStorage()?.removeItem(getPrevKey());
+      prevStorageRef.current?.removeItem(prevKeyRef.current);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, serializer, storage, getPrevStorage, getPrevKey]);
+  }, [key, serializer, storage]);
 
   return [value, setValue];
 };
