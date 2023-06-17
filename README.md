@@ -238,7 +238,7 @@ Returned value is identical to [useState](https://react.dev/reference/react/useS
 
 ### Description
 
-Returns a function to access the previous value of a variable.
+Returns the previous value of a variable.
 
 ### Arguments
 
