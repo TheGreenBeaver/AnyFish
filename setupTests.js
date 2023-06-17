@@ -8,10 +8,11 @@ jest.mock('react', () => {
     useState: function (initialState) {
       const [state, setState] = originalReact.useState(initialState);
 
-      const enhancedSetState = v => {
+      const enhancedSetState = originalReact.useCallback(v => {
         initialState?.onSetState?.(v);
         setState(v);
-      };
+      }, []);
+
       return [state, enhancedSetState];
     },
   };

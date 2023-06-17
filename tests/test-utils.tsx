@@ -16,10 +16,6 @@ export const spyOnSingle = <Method extends SimpleFunction>(
   return [original, spy];
 };
 
-export const waitMs = async (
-  ms: number, extra: number = 50,
-): Promise<void> => new Promise(resolve => setTimeout(resolve, ms + extra));
-
 export function extractLastResult<Result>(spy: jest.SpyInstance<Result>): Result {
   const { results } = spy.mock;
 

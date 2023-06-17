@@ -39,3 +39,7 @@ export type MapKey = string | number | symbol;
 export type SetState<T> = Dispatch<SetStateAction<T>>;
 
 export type SetStateResult<T> = [T, SetState<T>];
+
+export type Unfilled<T, K extends keyof T> = Omit<T, K> & {
+  [Key in K]?: T[Key]
+};

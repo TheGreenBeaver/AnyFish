@@ -1,27 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { createGetOptions } from '../utils/misc';
 import isString from 'lodash/isString';
 import mapValues from 'lodash/mapValues';
+import { Settings } from '../utils/settings';
+import throttle from 'lodash/throttle';
+import { useMountedState } from './use-mounted-state';
 
 export type Options = {
   track: boolean,
+  throttle: number,
 };
 
 type ChangeListener = (changeEvent: MediaQueryListEvent) => void;
 
-const getOptions = createGetOptions({ track: true });
+const defaultOptions: Options = {
+  throttle: Settings.defaults.delay,
+  ...Settings.defaults.options.mediaQuery,
+};
+
+const getOptions = createGetOptions(defaultOptions);
 
 /**
  * Checks if window matches provided media query.
  *
- * @version 1.3.0
+ * @version 2.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usemediaquery
  */
 export function useMediaQuery(mediaQuerySource: string, options?: Partial<Options>): boolean;
 /**
  * Checks if window matches each of the provided media queries.
  *
- * @version 1.3.0
+ * @version 2.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usemediaquery
  */
 export function useMediaQuery<Keys extends string>(
@@ -32,14 +41,16 @@ export function useMediaQuery<Keys extends string>(
   mediaQuerySource: string | Record<Keys, string>,
   options?: Partial<Options>,
 ) {
-  const { track } = getOptions(options);
+  const { track, throttle: throttleDelay } = getOptions(options);
 
-  const [matchesQuery, setMatchesQuery] = useState(() => {
+  const [matchesQuery, setMatchesQuery] = useMountedState(() => {
+    const isSingleQuery = isString(mediaQuerySource);
+
     if (typeof window === 'undefined') {
-      return false;
+      return isSingleQuery ? false : mapValues(mediaQuerySource, () => false);
     }
 
-    return isString(mediaQuerySource)
+    return isSingleQuery
       ? window.matchMedia(mediaQuerySource).matches
       : mapValues(mediaQuerySource, queryString => window.matchMedia(queryString).matches);
   });
@@ -50,7 +61,8 @@ export function useMediaQuery<Keys extends string>(
       setMatchesQuery(mediaQueryList.matches);
 
       if (track) {
-        const changeListener: ChangeListener = changeEvent => setMatchesQuery(changeEvent.matches);
+        const changeListenerBody: ChangeListener = changeEvent => setMatchesQuery(changeEvent.matches);
+        const changeListener = throttleDelay ? throttle(changeListenerBody, throttleDelay) : changeListenerBody;
         mediaQueryList.addEventListener('change', changeListener);
 
         return () => mediaQueryList.removeEventListener('change', changeListener);
@@ -61,9 +73,10 @@ export function useMediaQuery<Keys extends string>(
 
       if (track) {
         const changeEventListeners = mapValues(mediaQueryListMap, (mediaQueryList, key) => {
-          const changeListener: ChangeListener = changeEvent => setMatchesQuery(
+          const changeListenerBody: ChangeListener = changeEvent => setMatchesQuery(
             (curr: Record<Keys, boolean>) => ({ ...curr, [key]: changeEvent.matches }),
           );
+          const changeListener = throttleDelay ? throttle(changeListenerBody, throttleDelay) : changeListenerBody;
 
           mediaQueryList.addEventListener('change', changeListener);
 
@@ -79,7 +92,7 @@ export function useMediaQuery<Keys extends string>(
     }
 
     return undefined;
-  }, [mediaQuerySource, track]);
+  }, [mediaQuerySource, setMatchesQuery, throttleDelay, track]);
 
   return matchesQuery;
 }

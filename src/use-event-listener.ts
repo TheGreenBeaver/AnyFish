@@ -6,7 +6,7 @@ import isPlainObject from 'lodash/isPlainObject';
 import isString from 'lodash/isString';
 import isBool from 'lodash/isBoolean';
 
-export type Target = EventTarget | RefObject<EventTarget>;
+export type ListenerTarget = EventTarget | RefObject<EventTarget>;
 type Options = AddEventListenerOptions | boolean;
 type ManyListeners = EventListenerOrEventListenerObject[];
 
@@ -40,7 +40,7 @@ const isListener = (v: unknown): v is EventListenerOrEventListenerObject =>
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 export function useEventListener (
-  targetPointer: Target,
+  targetPointer: ListenerTarget,
   eventName: string,
   options: Options,
   ...eventListeners: ManyListeners
@@ -52,7 +52,7 @@ export function useEventListener (
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 export function useEventListener (
-  targetPointer: Target,
+  targetPointer: ListenerTarget,
   eventName: string,
   eventListener: EventListenerOrEventListenerObject,
   options: Options,
@@ -64,7 +64,7 @@ export function useEventListener (
  * @see https://github.com/TheGreenBeaver/AnyFish#useeventlistener
  */
 export function useEventListener (
-  targetPointer: Target,
+  targetPointer: ListenerTarget,
   eventName: string,
   ...eventListeners: ManyListeners
 ): void;
@@ -103,7 +103,7 @@ export function useEventListener (
 ): void;
 
 export function useEventListener (
-  firstArg: Target | string,
+  firstArg: ListenerTarget | string,
   secondArg: string | Options | EventListenerOrEventListenerObject,
   thirdArg?: Options | EventListenerOrEventListenerObject,
   fourthArg?: Options | EventListenerOrEventListenerObject,

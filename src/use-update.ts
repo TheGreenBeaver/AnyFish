@@ -2,6 +2,7 @@ import type { EffectCallback } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import isFunction from 'lodash/isFunction';
 import { createGetOptions } from '../utils/misc';
+import { Settings } from '../utils/settings';
 
 export type Options = {
   nthUpdate: number,
@@ -10,7 +11,7 @@ export type Options = {
   isInStrictMode: boolean,
 };
 
-const getOptions = createGetOptions<Options>({ nthUpdate: 1, withCleanup: true, once: false, isInStrictMode: true });
+const getOptions = createGetOptions<Options>(Settings.defaults.options.update);
 
 const getInitialUpdateCount = (options: Options): number => {
   const extraRender = options.isInStrictMode && process.env.NODE_ENV !== 'production';
@@ -21,7 +22,7 @@ const getInitialUpdateCount = (options: Options): number => {
 /**
  * A convenience wrapper for {@link React.useEffect} when the first N `deps` updates should not trigger the effect.
  *
- * @version 1.2.0
+ * @version 2.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useupdate
  */
 export const useUpdate = (

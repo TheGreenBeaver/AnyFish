@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useDelayedValue } from '../src/use-delayed-value';
-import { getUniqueReturnedValues, spyOnSingle, waitMs } from './test-utils';
+import { getUniqueReturnedValues, spyOnSingle } from './test-utils';
 import type { Options, HookResult } from '../src/use-delayed-value';
 
 describe('useDelayedValue', () => {
@@ -20,6 +20,13 @@ describe('useDelayedValue', () => {
   beforeEach(() => {
     delayedValueHookSpy.mockClear();
     onSetState.mockClear();
+
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 
   const prepareForTest = (
@@ -38,18 +45,18 @@ describe('useDelayedValue', () => {
     expect(getUniqueReturnedValues(delayedValueHookSpy, value => value[0])).toEqual([State.First, finalState]);
   };
 
-  const doUpdate = async (result: TestSource, newState: State, ms: number) => {
+  const doUpdate = (result: TestSource, newState: State, ms: number) => {
     result.current[1](newState);
     expect(onSetState).not.toHaveBeenCalled();
-    await waitMs(ms);
+    jest.advanceTimersByTime(ms);
   };
 
   it('Should debounce the value update', async () => {
     const result = prepareForTest();
 
-    await doUpdate(result, State.Second, 100);
-    await doUpdate(result, State.Third, 200);
-    await doUpdate(result, State.Fourth, 500);
+    doUpdate(result, State.Second, 100);
+    doUpdate(result, State.Third, 200);
+    doUpdate(result, State.Fourth, 500);
 
     await performFinalCheck(result);
   });
@@ -69,11 +76,11 @@ describe('useDelayedValue', () => {
     expect(onSetState).toHaveBeenCalledTimes(1);
 
     result.current[1](State.Third);
-    await waitMs(100);
+    jest.advanceTimersByTime(100);
     expect(onSetState).toHaveBeenCalledTimes(1);
 
     result.current[1](State.Fourth);
-    await waitMs(200);
+    jest.advanceTimersByTime(200);
 
     result.current[1](State.First);
     await waitFor(() => expect(result.current[0]).toBe(State.First));

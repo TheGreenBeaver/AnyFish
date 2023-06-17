@@ -27,7 +27,7 @@ export const use = <T, Args extends unknown[] = []>(factory: Usable<T, Args>, ..
 
 export const devConsole = mapValues(console, (method, methodName) => isFunction(method)
   ? (...args: Parameters<typeof method>) => {
-    if (use(Settings.isDev, methodName)) {
+    if (use(Settings.allowConsole, methodName)) {
       method(...args);
     }
   }

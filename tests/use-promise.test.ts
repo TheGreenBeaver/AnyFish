@@ -1,4 +1,4 @@
-import { getUniqueReturnedValues, spyOnSingle, waitMs } from './test-utils';
+import { getUniqueReturnedValues, spyOnSingle } from './test-utils';
 import type { HookResult} from '../src/use-promise';
 import { usePromise } from '../src/use-promise';
 import type { RenderHookResult } from '@testing-library/react';
@@ -27,6 +27,13 @@ describe('usePromise', () => {
   beforeEach(() => {
     promiseHookSpy.mockClear();
     timedPromiseCreatorSpy.mockClear();
+
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 
   it('Should give access to resolved value', async () => {
@@ -58,8 +65,8 @@ describe('usePromise', () => {
     await waitFor(() => expect(result.current[3].status).toBe(usePromise.Status.Processing));
     expect(result.current[2]).toBeTruthy();
 
-    await waitMs(TIMEOUT);
-    expect(result.current[2]).toBeFalsy();
+    jest.advanceTimersByTime(TIMEOUT);
+    await waitFor(() => expect(result.current[2]).toBeFalsy());
     expect(result.current[3].status).toBe(usePromise.Status.Resolved);
   });
 
@@ -106,10 +113,11 @@ describe('usePromise', () => {
 
   it('Should cleanup the results of previous triggers', async () => {
     const ADMIN = 'admin';
+    const TIMEOUT = 400;
     const SECRET_KEY = 'secret key';
 
     const promiseCreator = async (username: string): Promise<string> => {
-      await waitMs(50);
+      await new Promise(resolve => setTimeout(resolve, TIMEOUT));
 
       if (username === ADMIN) {
         return SECRET_KEY;
@@ -122,12 +130,22 @@ describe('usePromise', () => {
     const trigger = extractTrigger(result);
 
     trigger('common user');
+
+    jest.advanceTimersByTime(TIMEOUT / 2);
+    await waitFor(() => expect(result.current[2]).toBe(true));
+
+    jest.advanceTimersByTime(TIMEOUT / 2);
     await waitFor(() => {
       expect(result.current[0]).toBe(undefined);
       expectToHaveError(result);
     });
 
     trigger(ADMIN);
+
+    jest.advanceTimersByTime(TIMEOUT / 2);
+    await waitFor(() => expect(result.current[2]).toBe(true));
+
+    jest.advanceTimersByTime(TIMEOUT / 2);
     await waitFor(() => {
       expect(result.current[0]).toBe(SECRET_KEY);
       expect(result.current[1]).toBe(undefined);
@@ -167,7 +185,7 @@ describe('usePromise', () => {
         timeout: LAST + 50,
       });
 
-      await waitMs(LAST);
+      jest.advanceTimersByTime(LAST);
       expect(timedPromiseCreatorSpy).toHaveBeenCalledTimes(calledTimes);
       expect(timedPromiseCreatorSpy).toHaveBeenLastCalledWith(TIMEOUTS[tIndex]);
 

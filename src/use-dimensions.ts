@@ -1,11 +1,13 @@
 import type { StringMapToUnion, Nullable, Optional } from '../utils/types';
 import type { MutableRefObject, RefCallback } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import isFunction from 'lodash/isFunction';
 import isString from 'lodash/isString';
 import pick from 'lodash/pick';
 import throttle from 'lodash/throttle';
 import { devConsole } from '../utils/misc';
+import { Settings } from '../utils/settings';
+import { useMountedState } from './use-mounted-state';
 
 export type Dimensions = { width: number, height: number };
 
@@ -47,14 +49,14 @@ const keys = ['width', 'height'] as const;
 /**
  * Calculates the dimensions of a visual media object by its source.
  *
- * @version 1.0.0
+ * @version 2.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedimensions
  */
 export function useDimensions(src: string, mediaKind?: useDimensions.MediaKind): Nullable<Dimensions>;
 /**
  * Returns a callback ref to pass to a DOM element and calculates the dimensions of that element.
  *
- * @version 1.3.0
+ * @version 2.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedimensions
  */
 export function useDimensions<T extends Element>(options?: Options<T>): [Nullable<Dimensions>, RefCallback<T>];
@@ -62,18 +64,18 @@ export function useDimensions<T extends Element>(
   firstArg?: string | Options<T>,
   secondArg?: useDimensions.MediaKind,
 ) {
-  const [dimensions, setDimensions] = useState<Nullable<Dimensions>>(null);
+  const [dimensions, setDimensions] = useMountedState<Nullable<Dimensions>>(null);
   const elementRef = useRef<Optional<T>>(undefined);
 
   const isMedia = isString(firstArg);
   const originalRef = isMedia ? undefined : firstArg?.originalRef;
-  const throttleDelay = isMedia ? undefined : firstArg?.throttle;
+  const throttleDelay = isMedia ? undefined : (firstArg?.throttle ?? Settings.defaults.delay);
   const src = isMedia ? firstArg : undefined;
   const mediaKind = isMedia ? secondArg || useDimensions.MediaKind.Image : undefined;
 
   const enhancedSetDimensions = useMemo(
-    () => throttleDelay == null ? setDimensions : throttle(setDimensions, throttleDelay),
-    [throttleDelay],
+    () => !throttleDelay ? setDimensions : throttle(setDimensions, throttleDelay),
+    [setDimensions, throttleDelay],
   );
 
   const resizeObserver = useMemo(() => {
@@ -134,7 +136,7 @@ export function useDimensions<T extends Element>(
     };
 
     measure();
-  }, [src, mediaKind]);
+  }, [src, mediaKind, setDimensions]);
 
   const dimensionsTracker: RefCallback<T> = useCallback(instance => {
     if (originalRef) {
@@ -145,19 +147,20 @@ export function useDimensions<T extends Element>(
       }
     }
 
+    setDimensions(null);
+    const currentElement = elementRef.current;
+
+    if (currentElement) {
+      resizeObserver?.unobserve(currentElement);
+    }
+
     if (instance) {
       elementRef.current = instance;
       resizeObserver?.observe(instance);
     } else {
-      setDimensions(null);
-      const element = elementRef.current;
-
-      if (element) {
-        resizeObserver?.unobserve(element);
-        elementRef.current = undefined;
-      }
+      elementRef.current = undefined;
     }
-  }, [originalRef, resizeObserver]);
+  }, [originalRef, resizeObserver, setDimensions]);
 
   return isMedia ? dimensions : [dimensions, dimensionsTracker];
 }

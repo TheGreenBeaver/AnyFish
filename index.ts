@@ -17,7 +17,9 @@ export { useWillUnmount } from './src/use-will-unmount';
 
 export type { Options as UseDelayedValueOptions } from './src/use-delayed-value';
 export type { Dimensions, Options as UseDimensionsOptions } from './src/use-dimensions';
-export type { Target as ListenerTarget } from './src/use-event-listener';
+export type { ListenerTarget } from './src/use-event-listener';
+export type { Options as UseMediaQueryOptions } from './src/use-media-query';
+export type { Options as UsePersistentStateOptions } from './src/use-persistent-state';
 export type { Options as UsePromiseOptions, HookResult as UsePromiseResult } from './src/use-promise';
 export type { Options as UseSelectiveEffectOptions } from './src/use-selective-effect';
 export type { Options as UseUpdateOptions } from './src/use-update';

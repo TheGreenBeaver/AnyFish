@@ -5,6 +5,7 @@ import { createGetOptions } from '../utils/misc';
 import type { Optional, SetState, Usable } from '../utils/types';
 import { useMountedState } from './use-mounted-state';
 import type { DebouncedFunc } from 'lodash';
+import { Settings } from '../utils/settings';
 
 const delayFunctions = {
   throttle,
@@ -19,13 +20,18 @@ export type Options = {
   delayFn: DelayFnName,
 };
 
-const getOptions = createGetOptions<Options>({ delay: 300, delayFn: 'debounce' });
+const defaultOptions: Options = {
+  delay: Settings.defaults.delay,
+  ...Settings.defaults.options.delayedValue,
+};
+
+const getOptions = createGetOptions(defaultOptions);
 
 /**
  * A convenience wrapper for {@link React.useState} that lets you
  * {@link https://css-tricks.com/debouncing-throttling-explained-examples/|debounce or throttle} value updates.
  *
- * @version 1.3.0
+ * @version 2.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedelayedvalue
  */
 export function useDelayedValue<T>(
@@ -36,7 +42,7 @@ export function useDelayedValue<T>(
  * A convenience wrapper for {@link React.useState} that lets you
  * {@link https://css-tricks.com/debouncing-throttling-explained-examples/|debounce or throttle} value updates.
  *
- * @version 1.3.0
+ * @version 2.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usedelayedvalue
  */
 export function useDelayedValue<T = undefined>(): HookResult<Optional<T>>;
