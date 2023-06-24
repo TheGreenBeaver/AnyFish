@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * Returns a function to access the previous value of a variable.
+ * Returns the previous value of a variable.
  *
  * @version 2.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#useprevious

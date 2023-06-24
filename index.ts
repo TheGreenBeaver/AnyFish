@@ -12,6 +12,7 @@ export { usePromise } from './src/use-promise';
 export { useReRenderTrigger } from './src/use-re-render-trigger';
 export { useRenderCount } from './src/use-render-count';
 export { useSelectiveEffect } from './src/use-selective-effect';
+export { useSnapshotState } from './src/use-snapshot-state';
 export { useUpdate } from './src/use-update';
 export { useWillUnmount } from './src/use-will-unmount';
 

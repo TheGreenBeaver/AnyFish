@@ -56,7 +56,7 @@ A convenience wrapper for [useState](https://react.dev/reference/react/useState)
     delayFn: 'debounce' | 'throttle',
   }
   ```
-  `delay` defines the throttle / debounce timeout. _Defaults to_ 300.
+  `delay` defines the throttle / debounce timeout. _Defaults to_ 300.  
   `delayFn` defines how to delay the setter. _Defaults to_ `debounce`.
 
 ### Returned value
@@ -153,11 +153,11 @@ Returns a function to access the mounted state of a functional component.
 
 ### Call signatures
 1. `(mediaQuerySource, options) => boolean` - Checks if window matches provided media query
-  - **mediaQuerySource**: `string` - The media query to match against.
-  - **options** (_optional_): `Partial<Options>` - Adjustments for matching behaviour
+   - **mediaQuerySource**: `string` - The media query to match against.
+   - **options** (_optional_): `Partial<Options>` - Adjustments for matching behaviour
 2. `<K>(mediaQuerySources, options) => Record<K, boolean>`
-- **mediaQuerySource**: `Record<K, string>` - The media queries to match against.
-- **options** (_optional_): `Partial<Options>` - Adjustments for matching behaviour
+   - **mediaQuerySource**: `Record<K, string>` - The media queries to match against.
+   - **options** (_optional_): `Partial<Options>` - Adjustments for matching behaviour
 
 ### Type aliases
 
@@ -221,8 +221,8 @@ a persistent browser storage (i. e. localStorage).
   JSON.  
   `cleanup` defines whether the stored value should be cleaned up whenever `options.storage`, `options.serializer`
   or `key` change. _Defaults to_ `true`.  
-  `follow` defines whether the state value should be updated whenever `options.storage`, `options.serializer` or `key`
-  change to whatever is stored at that "new address". _Defaults to_ `false`.  
+  `follow` defines whether whenever `options.storage`, `options.serializer` or `key` change, the state value should be
+  updated to whatever is stored at that "new address". _Defaults to_ `false`.  
   `clearOnParsingError` defines whether the stored data should be cleared if the `serializer` fails to parse it.
   _Defaults to_ `true`.
 
@@ -351,6 +351,67 @@ the `effect` when `deps` **deeply** change.
   ```
   `compare` defines how the change in `deps` is detected. _By default_,
   [Lodash.isEqual](https://lodash.com/docs/4.17.15#isEqual) is used.
+
+## useSnapshotState
+
+### Call signature
+
+`(initialValue, externalControls, isValueValid) => [State, SetState]`
+
+### Description
+
+Example: a component accepts an `onChange` prop of type `(newValue: number) => void`, but needs to perform updates
+based on the previous value (i.e., on increment you'd probably do `onChange(value + 1)`). However, with such approach
+it's impossible to persist the `increment` function's reference equality: it would need to be re-created on each `value`
+update. `useSnapshotState` solves this problem: it accepts an external `setValue` that only works with plain values, and
+returns a persistent `SetState` callback that works with reducer-like updates, just like the setter returned
+by `useState`. Also, in case external setter or value aren't provided (the component is uncontrolled), the hook would
+manage the state internally.
+
+**Example**
+
+```typescript jsx
+type Props = { onPageChange?: (page: number) => void, page?: number };
+
+const Pagination: FC<Props> = props => {
+  const [page, setPage] = useSnapshotState(1, { value: props.page, setValue: props.onPageChange });
+  
+  // setPage does not depend on current page, so these callbacks keep reference equality
+  const decrement = useCallback(() => setPage(curr => curr - 1), [setPage]);
+  const increment = useCallback(() => setPage(curr => curr + 1), [setPage]);
+  
+  // page is reactive, so it can be used in jsx rendering
+  return (
+    <>
+      <button onClick={decrement}>-</button>
+      <span>{page}</span>
+      <button onClick={increment}>+</button>
+    </>
+  );
+};
+
+const fetchPageData = (page: number) => {
+  // I.e., some API stuff here
+};
+
+const MyPage: FC = () => (
+  <Pagination onPageChange={fetchPageData} />
+)
+```
+
+### Arguments
+
+- **initialValue**: `T | (() => T)` - The initial value, like
+  for [useState](https://react.dev/reference/react/useState).
+- **externalControls** (_optional_): `Partial<{ value: T, setValue: (newValue: T) => void }>` - External handlers to
+  make the component controlled.
+- **isValueValid** (_optional_): `(v: T | undefined) => v is T` - a type guard to check that the
+  provided `externalControls.value` fits and should be used as the returned reactive value. _Defaults
+  to_ `v => v !== undefined`.
+
+### Returned value
+
+The returned value is identical to [useState](https://react.dev/reference/react/useState).
 
 ## useUpdate
 
