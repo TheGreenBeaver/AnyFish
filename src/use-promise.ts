@@ -35,6 +35,14 @@ const getOptions = createGetOptions({
   skip: defaultSkip,
 }) as <Data, Deps extends unknown[]>(providedOptions?: Options<Data, Deps>) => Options<Data, Deps>;
 
+const skipToken = Symbol('skipToken');
+
+type SkipToken = typeof skipToken;
+
+const isDeps = <Data, Deps extends unknown[]>(
+  value?: Deps | SkipToken | Options<Data, Deps>,
+): value is Deps | SkipToken => isArray(value) || value === skipToken;
+
 /**
  * Tracks the lifecycle of a Promise, handles data storing and error catching.
  *
@@ -51,17 +59,19 @@ export function usePromise <Data, Deps extends unknown[]>(
  * @version 1.2.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usepromise
  */
-export function usePromise <Data, Deps extends unknown[]>(
-  promiseCreator: (...args: Deps) => Promise<Data>, deps?: Deps, options?: Options<Data, Deps>,
-): HookResult<Data, Deps>;
-export function usePromise <Data, Deps extends unknown[]>(
+export function usePromise<Data, Deps extends unknown[]>(
   promiseCreator: (...args: Deps) => Promise<Data>,
-  secondArg?: Deps | Options<Data, Deps>,
+  deps?: Deps | SkipToken,
+  options?: Options<Data, Deps>,
+): HookResult<Data, Deps>;
+export function usePromise<Data, Deps extends unknown[]>(
+  promiseCreator: (...args: Deps) => Promise<Data>,
+  secondArg?: Deps | SkipToken | Options<Data, Deps>,
   thirdArg?: Options<Data, Deps>,
 ): HookResult<Data, Deps> {
-  const secondIsArray = isArray(secondArg);
-  const deps = secondIsArray ? secondArg : undefined;
-  const options = thirdArg || (!secondIsArray ? secondArg : undefined);
+  const secondIsDeps = isDeps(secondArg);
+  const deps = secondIsDeps ? secondArg : undefined;
+  const options = thirdArg || (!secondIsDeps ? secondArg : undefined);
 
   const {
     onStart,
@@ -78,7 +88,7 @@ export function usePromise <Data, Deps extends unknown[]>(
   const [status, setStatus] = useMountedState<usePromise.Status>(usePromise.Status.Pending);
 
   const lastPromiseRef = useRef<Optional<Promise<Data>>>(undefined);
-  const prevDepsRef = useRef<Optional<Deps>>(undefined);
+  const prevDepsRef = useRef<Optional<Deps | SkipToken>>(undefined);
 
   const trigger = useCallback(async (...args: Deps) => {
     if (resolveRace === usePromise.ResolveRace.TakeFirst && lastPromiseRef.current) {
@@ -122,13 +132,13 @@ export function usePromise <Data, Deps extends unknown[]>(
   }, [promiseCreator, resolveRace, onStart, onSuccess, onError, onAny, setData, setError, setStatus]);
 
   useEffect(() => {
-    if (deps && !use(skip, ...deps) && (triggerOnSameDeps || !isEqual(deps, prevDepsRef.current))) {
+    if (isArray(deps) && !use(skip, ...deps) && (triggerOnSameDeps || !isEqual(deps, prevDepsRef.current))) {
       trigger(...deps);
     }
 
     prevDepsRef.current = deps;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps ? [...deps, trigger, skip, triggerOnSameDeps] : []);
+  }, isArray(deps) ? [...deps, trigger, skip, triggerOnSameDeps] : []);
 
   return useMemo(
     () => [data, error, status === usePromise.Status.Processing, { trigger, status }],
