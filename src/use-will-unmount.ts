@@ -6,7 +6,7 @@ import { useEffect } from 'react';
  * @version 1.0.0
  * @see https://github.com/TheGreenBeaver/AnyFish#usewillunmount
  */
-export const useWillUnmount = (effect: () => void): void => {
+export const useWillUnmount = (effect: VoidFunction): void => {
   useEffect(() => () => {
     // Long notation so that no `return`s affect the hook logic
     effect();

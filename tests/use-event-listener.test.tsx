@@ -56,7 +56,7 @@ describe('useEventListener', () => {
       EventListenerOrEventListenerObject,
       AddEventListenerOptions | boolean,
     ] | EventListenerOrEventListenerObject[]
-  ): () => void => {
+  ): VoidFunction => {
     const Component: FC = () => {
       const divRef = useRef<HTMLDivElement>(null);
       useEventListener(divRef, 'click', ...(args as HookArgs));

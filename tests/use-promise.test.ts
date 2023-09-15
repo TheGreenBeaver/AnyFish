@@ -211,4 +211,27 @@ describe('usePromise', () => {
       () => performRaceTest(usePromise.ResolveRace.TakeLast, 2, 3),
     );
   });
+
+  it('Should accept skipToken', async () => {
+    const promiseCreator = jest.fn((value: string) => Promise.resolve(value));
+    const VAL = 'value';
+
+    const { result, rerender } = renderHook(({ value }: { value?: string }) => usePromise<string, [string]>(
+      promiseCreator,
+      value ? [value] : usePromise.skipToken,
+    ), { initialProps: { value: VAL } });
+
+    await waitFor(() => expect(result.current[0]).toBe(VAL));
+
+    rerender({});
+
+    await waitFor(() => expect(result.current[0]).toBe(VAL));
+    await waitFor(() => expect(promiseCreator).toHaveBeenCalledTimes(1));
+
+    const NEXT_VAL = 'next value';
+    rerender({ value: NEXT_VAL });
+
+    await waitFor(() => expect(result.current[0]).toBe(NEXT_VAL));
+    await waitFor(() => expect(promiseCreator).toHaveBeenCalledTimes(2));
+  });
 });

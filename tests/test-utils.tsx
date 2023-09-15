@@ -28,7 +28,7 @@ type SwitchingComponentsOptions<Props extends StringMap> =
 export const createSwitchingComponents = <Props extends StringMap>(
   options: SwitchingComponentsOptions<Props>,
   initialProps: Props = {} as Props,
-): [() => void, RenderResult] => {
+): [VoidFunction, RenderResult] => {
   const BUTTON_TEXT = 'switch';
 
   const ActivityComponent: FC<Props> = isObjectWithKey(options, 'ActivityComponent')

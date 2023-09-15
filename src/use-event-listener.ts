@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { isObjectWithKey } from '../utils/misc';
 import isFunction from 'lodash/isFunction';
 import isPlainObject from 'lodash/isPlainObject';
@@ -110,8 +110,8 @@ export function useEventListener (
   ...rest: ManyListeners
 ) {
   const getTargetAccessor = useCallback(() => isString(firstArg) ? window : firstArg, [firstArg]);
-  const eventName = useMemo(() => [firstArg, secondArg].find(isString) as string, [firstArg, secondArg]);
-  const options = useMemo(() => [secondArg, thirdArg, fourthArg].find(isOptions), [secondArg, thirdArg, fourthArg]);
+  const eventName = [firstArg, secondArg].find(isString) as string;
+  const options = [secondArg, thirdArg, fourthArg].find(isOptions);
 
   const combinedEventListener = useCallback((e: Event) => {
     const eventListeners = [secondArg, thirdArg, fourthArg, ...rest].filter(isListener);

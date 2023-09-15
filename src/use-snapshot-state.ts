@@ -1,5 +1,5 @@
 import type { SetState, Usable } from '../utils/types';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { use } from '../utils/misc';
 
 type ExternalControls<T> = Partial<{
@@ -21,7 +21,7 @@ export const useSnapshotState = <T>(
   isValueValid = (v => v !== undefined) as (v: T | undefined) => v is T,
 ): [T, SetState<T>] => {
   const v = externalControls?.value;
-  const externalValue = useMemo(() => isValueValid(v) ? v : PIN, [isValueValid, v]);
+  const externalValue = isValueValid(v) ? v : PIN;
   const setExternalValue = externalControls?.setValue;
 
   const getDefaultValue = () => externalValue === PIN ? use(initialValue) : externalValue;

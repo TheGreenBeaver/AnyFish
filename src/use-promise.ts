@@ -1,6 +1,6 @@
 import type { Optional, Usable } from '../utils/types';
 import { useMountedState } from './use-mounted-state';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { createGetOptions, use } from '../utils/misc';
 import isArray from 'lodash/isArray';
 import isNil from 'lodash/isNil';
@@ -8,10 +8,10 @@ import isEqual from 'lodash/isEqual';
 
 export type Options<Data, Deps extends unknown[]> = Partial<{
   resolveRace: usePromise.ResolveRace,
-  onStart: () => void,
+  onStart: VoidFunction,
   onSuccess: (result: Data) => void,
   onError: (e: unknown) => void,
-  onAny: () => void,
+  onAny: VoidFunction,
   skip: Usable<boolean, Deps>,
   triggerOnSameDeps: boolean,
 }>;
@@ -19,6 +19,8 @@ export type Options<Data, Deps extends unknown[]> = Partial<{
 type More<Deps extends unknown[]> = {
   status: usePromise.Status,
   trigger: (...args: Deps) => Promise<void>,
+  clearError: VoidFunction,
+  clearData: VoidFunction,
 };
 
 export type HookResult<Data, Deps extends unknown[]> = [
@@ -35,13 +37,11 @@ const getOptions = createGetOptions({
   skip: defaultSkip,
 }) as <Data, Deps extends unknown[]>(providedOptions?: Options<Data, Deps>) => Options<Data, Deps>;
 
-const skipToken = Symbol('skipToken');
-
-type SkipToken = typeof skipToken;
+type SkipToken = typeof usePromise.skipToken;
 
 const isDeps = <Data, Deps extends unknown[]>(
   value?: Deps | SkipToken | Options<Data, Deps>,
-): value is Deps | SkipToken => isArray(value) || value === skipToken;
+): value is Deps | SkipToken => isArray(value) || value === usePromise.skipToken;
 
 /**
  * Tracks the lifecycle of a Promise, handles data storing and error catching.
@@ -81,7 +81,7 @@ export function usePromise<Data, Deps extends unknown[]>(
     skip,
     resolveRace,
     triggerOnSameDeps,
-  } = useMemo(() => getOptions(options), [options]);
+  } = getOptions(options);
 
   const [data, setData] = useMountedState<Optional<Data>>(undefined);
   const [error, setError] = useMountedState(undefined);
@@ -98,7 +98,7 @@ export function usePromise<Data, Deps extends unknown[]>(
     const promise = promiseCreator(...args);
     lastPromiseRef.current = promise;
 
-    const doIfWonRace = (action: () => void) => {
+    const doIfWonRace = (action: VoidFunction) => {
       if (resolveRace !== usePromise.ResolveRace.TakeLast || lastPromiseRef.current === promise) {
         action();
       }
@@ -132,18 +132,28 @@ export function usePromise<Data, Deps extends unknown[]>(
   }, [promiseCreator, resolveRace, onStart, onSuccess, onError, onAny, setData, setError, setStatus]);
 
   useEffect(() => {
-    if (isArray(deps) && !use(skip, ...deps) && (triggerOnSameDeps || !isEqual(deps, prevDepsRef.current))) {
+    if (
+      deps &&
+      deps !== usePromise.skipToken &&
+      !use(skip, ...deps) &&
+      (triggerOnSameDeps || !isEqual(deps, prevDepsRef.current))
+    ) {
       trigger(...deps);
     }
 
     prevDepsRef.current = deps;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, isArray(deps) ? [...deps, trigger, skip, triggerOnSameDeps] : []);
+  }, deps ? [...[deps].flat(), trigger, skip, triggerOnSameDeps] : []);
 
-  return useMemo(
-    () => [data, error, status === usePromise.Status.Processing, { trigger, status }],
-    [data, error, trigger, status],
-  );
+  const clearError = useCallback(() => setError(undefined), [setError]);
+  const clearData = useCallback(() => setData(undefined), [setData]);
+
+  return [
+    data,
+    error,
+    status === usePromise.Status.Processing,
+    { trigger, status, clearError, clearData },
+  ];
 }
 
 export namespace usePromise {
@@ -158,4 +168,6 @@ export namespace usePromise {
     TakeFirst = 'takeFirst',
     TakeLast = 'takeLast',
   }
+
+  export const skipToken = Symbol('skipToken');
 }
